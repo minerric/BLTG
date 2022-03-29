@@ -353,4 +353,4 @@ const CBigNum BN_ONE = CBigNum(1);
 const CBigNum BN_TWO = CBigNum(2);
 const CBigNum BN_THREE = CBigNum(3);
 
-#endif // BITCOIN_BIGNUM_H
+#endif  BITCOIN_BIGNUM_H

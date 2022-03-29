@@ -4,6 +4,7 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Class for bltgd node under test"""
 
+import contextlib
 import decimal
 import errno
 import http.client
@@ -100,7 +101,7 @@ class TestNode():
         if stderr is None:
             stderr = self.stderr
         # Delete any existing cookie file -- if such a file exists (eg due to
-        # unclean shutdown), it will get overwritten anyway by bitcoind, and
+        # unclean shutdown), it will get overwritten anyway by bltgd, and
         # potentially interfere with our attempt to authenticate
         delete_cookie_file(self.datadir)
         self.process = subprocess.Popen(self.args + extra_args, stderr=stderr, *args, **kwargs)
@@ -182,7 +183,7 @@ class TestNode():
     def node_encrypt_wallet(self, passphrase):
         """"Encrypts the wallet.
 
-        This causes bltgd to shutdown, so this method takes
+        This causes pivxd to shutdown, so this method takes
         care of cleaning up resources."""
         self.encryptwallet(passphrase)
         self.wait_until_stopped()
@@ -251,10 +252,10 @@ class TestNodeCLI():
     def batch(self, requests):
         results = []
         for request in requests:
-           try:
-               results.append(dict(result=request()))
-           except JSONRPCException as e:
-               results.append(dict(error=e))
+            try:
+                results.append(dict(result=request()))
+            except JSONRPCException as e:
+                results.append(dict(error=e))
         return results
 
     def send_cli(self, command=None, *args, **kwargs):

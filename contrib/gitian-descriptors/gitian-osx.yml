@@ -1,5 +1,5 @@
 ---
-name: "bltg-osx-3.1.99"
+name: "bltg-osx-4.0"
 enable_cache: true
 distro: "ubuntu"
 suites:
@@ -109,7 +109,7 @@ script: |
   CONFIG_SITE=${BASEPREFIX}/`echo "${HOSTS}" | awk '{print $1;}'`/share/config.site ./configure --prefix=/
   make dist
   SOURCEDIST=`echo bltg-*.tar.gz`
-  DISTNAME=`echo ${SOURCEDIST} | sed 's/.tar.*//'`
+DISTNAME=`echo ${SOURCEDIST} | sed 's/.tar.*//'`
 
   # Correct tar file order
   mkdir -p temp

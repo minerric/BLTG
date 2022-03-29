@@ -67,6 +67,13 @@ def create_transaction(prevtx, n, sig, value, scriptPubKey=CScript()):
     tx.calc_sha256()
     return tx
 
+def create_transaction_from_outpoint(outPoint, sig, value, scriptPubKey=CScript()):
+    tx = CTransaction()
+    tx.vin.append(CTxIn(outPoint, sig, 0xffffffff))
+    tx.vout.append(CTxOut(value, scriptPubKey))
+    tx.calc_sha256()
+    return tx
+
 def get_legacy_sigopcount_block(block, fAccurate=True):
     count = 0
     for tx in block.vtx:
@@ -81,3 +88,11 @@ def get_legacy_sigopcount_tx(tx, fAccurate=True):
         # scriptSig might be of type bytes, so convert to CScript for the moment
         count += CScript(j.scriptSig).GetSigOpCount(fAccurate)
     return count
+
+# BLTG specific blocktools
+def create_coinbase_pos(height):
+    coinbase = CTransaction()
+    coinbase.vin = [CTxIn(NullOutPoint, script_BIP34_coinbase_height(height), 0xffffffff)]
+    coinbase.vout = [CTxOut(0, b"")]
+    coinbase.calc_sha256()
+    return coinbase

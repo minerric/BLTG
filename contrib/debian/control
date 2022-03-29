@@ -1,8 +1,8 @@
 Source: bltg
 Section: utils
 Priority: optional
-Maintainer: cpass <chris@block-logic.com>
-Uploaders: cpass <chris@block-logic.com>
+Maintainer: minerric <ricardo@block-logic.com>
+Uploaders: minerric <ricardo@block-logic.com>
 Build-Depends: debhelper,
  devscripts,
  automake,

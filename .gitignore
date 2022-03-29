@@ -1,4 +1,4 @@
-!.gitignore
+.gitignore
 *.sublime-project
 *.sublime-workspace
 todo.txt
@@ -13,7 +13,6 @@ src/bltg-cli
 src/bltg-tx
 src/test/test_bltg
 src/qt/test/test_bltg-qt
-
 # autoreconf
 Makefile.in
 aclocal.m4
@@ -64,7 +63,7 @@ src/qt/test/moc*.cpp
 *.pyc
 *.o
 *.o-*
-#*.patch
+*.patch
 .bltg
 *.a
 *.pb.cc
@@ -132,3 +131,10 @@ libbitcoinconsensus.pc
 .idea
 CMakeLists.txt
 cmake-build-debug
+
+moc_*
+*.tmp
+ui_*
+build*
+bltgd.*
+bltgd-new-gui.*

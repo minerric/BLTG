@@ -11,7 +11,6 @@
 #include <vector>
 
 class CPubKey;
-
 class CachingTransactionSignatureChecker : public TransactionSignatureChecker
 {
 private:

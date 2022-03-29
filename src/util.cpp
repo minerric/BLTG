@@ -22,9 +22,6 @@
 #include <stdarg.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <openssl/bio.h>
-#include <openssl/buffer.h>
-#include <openssl/evp.h>
 
 
 #ifndef WIN32
@@ -98,6 +95,11 @@ bool fLiteMode = false;
 // SwiftX
 bool fEnableSwiftTX = true;
 int nSwiftTXDepth = 5;
+// Automatic Zerocoin minting
+bool fEnableZeromint = true;
+bool fEnableAutoConvert = true;
+int nZeromintPercentage = 10;
+int nPreferredDenom = 0;
 const int64_t AUTOMINT_DELAY = (60 * 5); // Wait at least 5 minutes until Automint starts
 
 /** Spork enforcement enabled time */
@@ -113,7 +115,6 @@ bool fDebug = false;
 bool fPrintToConsole = false;
 bool fPrintToDebugLog = true;
 bool fDaemon = false;
-bool fServer = false;
 std::string strMiscWarning;
 bool fLogTimestamps = false;
 bool fLogIPs = false;
@@ -377,7 +378,7 @@ std::string HelpMessageOpt(const std::string &option, const std::string &message
            std::string("\n\n");
 }
 
-static std::string FormatException(std::exception* pex, const char* pszThread)
+static std::string FormatException(const std::exception* pex, const char* pszThread)
 {
 #ifdef WIN32
     char pszModule[MAX_PATH] = "";
@@ -393,7 +394,7 @@ static std::string FormatException(std::exception* pex, const char* pszThread)
             "UNKNOWN EXCEPTION       \n%s in %s       \n", pszModule, pszThread);
 }
 
-void PrintExceptionContinue(std::exception* pex, const char* pszThread)
+void PrintExceptionContinue(const std::exception* pex, const char* pszThread)
 {
     std::string message = FormatException(pex, pszThread);
     LogPrintf("\n\n************************\n%s\n", message);
@@ -552,7 +553,7 @@ bool TryCreateDirectory(const boost::filesystem::path& p)
 {
     try {
         return boost::filesystem::create_directory(p);
-    } catch (boost::filesystem::filesystem_error) {
+    } catch (const boost::filesystem::filesystem_error&) {
         if (!boost::filesystem::exists(p) || !boost::filesystem::is_directory(p))
             throw;
     }

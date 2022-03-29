@@ -37,7 +37,11 @@ extern bool fMasterNode;
 extern bool fLiteMode;
 extern bool fEnableSwiftTX;
 extern int nSwiftTXDepth;
+extern int nZeromintPercentage;
 extern const int64_t AUTOMINT_DELAY;
+extern int nPreferredDenom;
+extern bool fEnableZeromint;
+extern bool fEnableAutoConvert;
 extern int64_t enforceMasternodePaymentsTime;
 extern std::string strMasterNodeAddr;
 extern int keysLoaded;
@@ -50,7 +54,6 @@ extern std::map<std::string, std::vector<std::string> > mapMultiArgs;
 extern bool fDebug;
 extern bool fPrintToConsole;
 extern bool fPrintToDebugLog;
-extern bool fServer;
 extern std::string strMiscWarning;
 extern bool fLogTimestamps;
 extern bool fLogIPs;
@@ -120,7 +123,7 @@ static inline bool error(const char* format)
 
 double double_safe_addition(double fValue, double fIncrement);
 double double_safe_multiplication(double fValue, double fmultiplicator);
-void PrintExceptionContinue(std::exception* pex, const char* pszThread);
+void PrintExceptionContinue(const std::exception* pex, const char* pszThread);
 void ParseParameters(int argc, const char* const argv[]);
 void FileCommit(FILE* fileout);
 bool TruncateFile(FILE* file, unsigned int length);

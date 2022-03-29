@@ -64,7 +64,7 @@ color:#333;
 }
 
 QToolBar {
-/*background-color: qlineargradient(y1:0, y2: 1, stop: 0 #372f44, stop: 0.75 #372f44, stop: 0.99 #ffffff, stop: 1 #ffffff);*/
+background-color: qlineargradient(y1:0, y2: 1, stop: 0 #372f44, stop: 0.75 #372f44, stop: 0.99 #ffffff, stop: 1 #ffffff);
 border:0px solid #333;
 padding:1;
 margin:0;
@@ -73,7 +73,7 @@ width: 70px;
 
 QToolBar > QToolButton {
 Alignment: left;
-background-color: #fff; /*#372f44;*/
+background-color: #372f44;
 selection-background-color:transparent;
 border:0.5px solid #888;
 border-left: 0px;
@@ -88,8 +88,8 @@ height: 60px;
 }
 
 QToolBar > QToolButton:checked {
-/*background-color: qlineargradient(x1:0, x2: 1, stop: 0 #ffffff, stop: 0.07 #ffffff, stop: 0.0701 #372f44, stop: 1 #372f44);*/
-color:#323E50;
+background-color: qlineargradient(x1:0, x2: 1, stop: 0 #ffffff, stop: 0.07 #ffffff, stop: 0.0701 #372f44, stop: 1 #372f44);
+color:#fff;
 }
 
 /* QToolBar > QToolButton:hover:!selected { */
@@ -1720,6 +1720,16 @@ QWidget#GovernancePage .ProposalFrame#proposalFrame {
 QWidget#GovernancePage .ProposalFrame#proposalFramePassing {
     background-color:qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #00cc00, stop: 1 #00ef00);
     border:1px solid #00ef00;
+}
+
+QWidget#GovernancePage .ProposalFrame#proposalFrameNotEstablished {
+    background-color:qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #0080ff, stop: 1 #00a3ff);
+    border:1px solid #00a3ff;
+}
+
+QWidget#GovernancePage .ProposalFrame#proposalFramePassingUnfunded {
+    background-color:qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #cccc00, stop: 1 #efef00);
+    border:1px solid #efef00;
 }
 
 QWidget#GovernancePage .ProposalFrame > QLabel#strProposalName, QLabel#strMonthlyPayout, QLabel#strRemainingPaymentCount {

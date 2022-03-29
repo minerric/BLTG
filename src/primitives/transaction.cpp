@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
 // Copyright (c) 2015-2019 The PIVX developers
-// Copyright (c) 2018-2019 The BLTG developers
+// Copyright (c) 2018-2022 The BLTG developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -15,10 +15,7 @@
 #include "utilstrencodings.h"
 #include "transaction.h"
 
-
-extern bool GetTransaction(const uint256 &hash, CTransaction &txOut, uint256 &hashBlock, bool fAllowSlow);
-
-std::string COutPoint::ToString() const
+std::string BaseOutPoint::ToStringShort() const
 {
     return strprintf("COutPoint(%s, %u)", hash.ToString()/*.substr(0,10)*/, n);
 }
@@ -210,6 +207,40 @@ bool CTransaction::IsCoinStake() const
     return (vout.size() >= 2 && vout[0].IsEmpty());
 }
 
+bool CTransaction::CheckColdStake(const CScript& script) const
+{
+
+    // tx is a coinstake tx
+    if (!IsCoinStake())
+        return false;
+
+    // all inputs have the same scriptSig
+    CScript firstScript = vin[0].scriptSig;
+    if (vin.size() > 1) {
+        for (unsigned int i=1; i<vin.size(); i++)
+            if (vin[i].scriptSig != firstScript) return false;
+    }
+
+    // all outputs except first (coinstake marker) and last (masternode payout)
+    // have the same pubKeyScript and it matches the script we are spending
+    if (vout[1].scriptPubKey != script) return false;
+    if (vin.size() > 3) {
+        for (unsigned int i=2; i<vout.size()-1; i++)
+            if (vout[i].scriptPubKey != script) return false;
+    }
+
+    return true;
+}
+
+bool CTransaction::HasP2CSOutputs() const
+{
+    for(const CTxOut& txout : vout) {
+        if (txout.scriptPubKey.IsPayToColdStaking())
+            return true;
+    }
+    return false;
+}
+
 CAmount CTransaction::GetValueOut() const
 {
     CAmount nValueOut = 0;
@@ -303,6 +334,11 @@ unsigned int CTransaction::CalculateModifiedSize(unsigned int nTxSize) const
             nTxSize -= offset;
     }
     return nTxSize;
+}
+
+unsigned int CTransaction::GetTotalSize() const
+{
+    return ::GetSerializeSize(*this, SER_NETWORK, PROTOCOL_VERSION);
 }
 
 std::string CTransaction::ToString() const

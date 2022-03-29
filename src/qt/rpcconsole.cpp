@@ -1,7 +1,7 @@
 // Copyright (c) 2011-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
 // Copyright (c) 2015-2019 The PIVX developers
-// Copyright (c) 2018-2019 The BLTG developers
+// Copyright (c) 2018-2022 The BLTG developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -21,8 +21,6 @@
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif // ENABLE_WALLET
-
-#include <openssl/crypto.h>
 
 #include <univalue.h>
 
@@ -240,17 +238,17 @@ void RPCExecutor::request(const QString& command)
             strPrint = result.write(2);
 
         emit reply(RPCConsole::CMD_REPLY, QString::fromStdString(strPrint));
-    } catch (UniValue& objError) {
+    } catch (const UniValue& objError) {
         try // Nice formatting for standard-format error
         {
             int code = find_value(objError, "code").get_int();
             std::string message = find_value(objError, "message").get_str();
             emit reply(RPCConsole::CMD_ERROR, QString::fromStdString(message) + " (code " + QString::number(code) + ")");
-        } catch (std::runtime_error&) // raised when converting to invalid type, i.e. missing code or message
+        } catch (const std::runtime_error&) // raised when converting to invalid type, i.e. missing code or message
         {                             // Show raw JSON object
             emit reply(RPCConsole::CMD_ERROR, QString::fromStdString(objError.write()));
         }
-    } catch (std::exception& e) {
+    } catch (const std::exception& e) {
         emit reply(RPCConsole::CMD_ERROR, QString("Error: ") + QString::fromStdString(e.what()));
     }
 }
@@ -287,7 +285,6 @@ RPCConsole::RPCConsole(QWidget* parent) : QDialog(parent, Qt::WindowSystemMenuHi
     connect(ui->btn_resync, SIGNAL(clicked()), this, SLOT(walletResync()));
 
     // set library version labels
-    ui->openSSLVersion->setText(SSLeay_version(SSLEAY_VERSION));
 #ifdef ENABLE_WALLET
     std::string strPathCustom = GetArg("-backuppath", "");
     std::string strzBLTGPathCustom = GetArg("-zbltgbackuppath", "");

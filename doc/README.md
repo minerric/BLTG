@@ -42,13 +42,13 @@ The following are developer notes on how to build BLTG on your native platform. 
 
 Development
 ---------------------
-The Bltg repo's [root README](https://github.com/Block-Logic-Technology-Group/bltg/blob/master/README.md) contains relevant information on the development process and automated testing.
+The Bltg repo's [root README](/README.md) contains relevant information on the development process and automated testing.
 
 - [Developer Notes](developer-notes.md)
 - [Multiwallet Qt Development](multiwallet-qt.md)
 - [Release Notes](release-notes.md)
 - [Release Process](release-process.md)
-- [Source Code Documentation (External Link)](https://dev.visucore.com/bitcoin/doxygen/) ***TODO***
+- [Source Code Documentation (External Link)](https://www.fuzzbawls.pw/pivx/doxygen/)
 - [Translation Process](translation_process.md)
 - [Unit Tests](unit-tests.md)
 - [Unauthenticated REST Interface](REST-interface.md)

@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
 // Copyright (c) 2015-2019 The PIVX developers
-// Copyright (c) 2018-2019 The BLTG developers
+// Copyright (c) 2018-2022 The BLTG developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -284,6 +284,8 @@ public:
     }
 
     bool IsCoinStake() const;
+    bool CheckColdStake(const CScript& script) const;
+    bool HasP2CSOutputs() const;
 
     friend bool operator==(const CTransaction& a, const CTransaction& b)
     {
@@ -294,6 +296,8 @@ public:
     {
         return a.hash != b.hash;
     }
+
+    unsigned int GetTotalSize() const;
 
     std::string ToString() const;
 };

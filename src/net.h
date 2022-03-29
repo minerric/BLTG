@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
 // Copyright (c) 2015-2019 The PIVX developers
-// Copyright (c) 2018-2019 The BLTG developers
+// Copyright (c) 2018-2022 The BLTG developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -63,6 +63,10 @@ static const bool DEFAULT_UPNP = false;
 #endif
 /** The maximum number of entries in mapAskFor */
 static const size_t MAPASKFOR_MAX_SZ = MAX_INV_SZ;
+/** Disconnected peers are added to setOffsetDisconnectedPeers only if node has less than ENOUGH_CONNECTIONS */
+#define ENOUGH_CONNECTIONS 2
+/** Maximum number of peers added to setOffsetDisconnectedPeers before triggering a warning */
+#define MAX_TIMEOFFSET_DISCONNECTIONS 16
 
 unsigned int ReceiveFloodSize();
 unsigned int SendBufferSize();
@@ -82,6 +86,7 @@ bool BindListenPort(const CService& bindAddr, std::string& strError, bool fWhite
 void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler);
 bool StopNode();
 void SocketSendData(CNode* pnode);
+void CheckOffsetDisconnectedPeers(const CNetAddr& ip);
 
 typedef int NodeId;
 
@@ -444,14 +449,14 @@ public:
         setAddrKnown.insert(addr);
     }
 
-    void PushAddress(const CAddress& addr)
+    void PushAddress(const CAddress& _addr, FastRandomContext &insecure_rand)
     {
         // Known checking here is only to save space from duplicates.
         // SendMessages will filter it again for knowns that were added
         // after addresses were pushed.
         if (addr.IsValid() && !setAddrKnown.count(addr)) {
             if (vAddrToSend.size() >= MAX_ADDR_TO_SEND) {
-                vAddrToSend[insecure_rand() % vAddrToSend.size()] = addr;
+                vAddrToSend[insecure_rand.randrange(vAddrToSend.size())] = _addr;
             } else {
                 vAddrToSend.push_back(addr);
             }

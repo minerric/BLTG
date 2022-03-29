@@ -1,8 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2017 The PIVX developers
-// Copyright (c) 2018-2019 The BLTG developers
+// Copyright (c) 2015-2019 The PIVX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -29,7 +28,7 @@
  *
  * \section intro_sec Introduction
  *
- * This is the developer documentation of the reference client for an experimental new digital currency called BLTG (http://www.block-logic.com),
+ * This is the developer documentation of the reference client for an experimental new digital currency called BLTG (https://block-logic.com/),
  * which enables instant payments to anyone, anywhere in the world. BLTG uses peer-to-peer technology to operate
  * with no central authority: managing transactions and issuing money are carried out collectively by the network.
  *
@@ -90,7 +89,7 @@ bool AppInit(int argc, char* argv[])
         }
         try {
             ReadConfigFile(mapArgs, mapMultiArgs);
-        } catch (std::exception& e) {
+        } catch (const std::exception& e) {
             fprintf(stderr, "Error reading configuration file: %s\n", e.what());
             return false;
         }
@@ -142,7 +141,7 @@ bool AppInit(int argc, char* argv[])
         SoftSetBoolArg("-server", true);
 
         fRet = AppInit2();
-    } catch (std::exception& e) {
+    } catch (const std::exception& e) {
         PrintExceptionContinue(&e, "AppInit()");
     } catch (...) {
         PrintExceptionContinue(NULL, "AppInit()");

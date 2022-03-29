@@ -484,3 +484,4 @@ class SkipTest(Exception):
     """This exception is raised to skip a test"""
     def __init__(self, message):
         self.message = message
+

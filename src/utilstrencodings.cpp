@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
-// Copyright (c) 2016-2018 The PIVX developers
-// Copyright (c) 2018-2019 The BLTG developers
+// Copyright (c) 2016-2019 The PIVX developers
+// Copyright (c) 2018-2022 The BLTG developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -56,7 +56,7 @@ bool validateURL(std::string strURL, std::string& strErr, unsigned int maxSize) 
 
     // check fronts
     bool found = false;
-    for (int i=0; i < reqPre.size() && !found; i++) {
+    for (int i=0; i < (int) reqPre.size() && !found; i++) {
         if (strURL.find(reqPre[i]) == 0) found = true;
     }
     if ((!found) && (reqPre.size() > 0)) {
@@ -375,7 +375,6 @@ std::string EncodeBase32(const std::string& str)
 {
     return EncodeBase32((const unsigned char*)str.c_str(), str.size());
 }
-
 std::vector<unsigned char> DecodeBase32(const char* p, bool* pfInvalid)
 {
     static const int decode32_table[256] =
@@ -615,3 +614,185 @@ int atoi(const std::string& str)
 {
     return atoi(str.c_str());
 }
+
+
+/** Upper bound for mantissa.
+* 10^18-1 is the largest arbitrary decimal that will fit in a signed 64-bit integer.
+* Larger integers cannot consist of arbitrary combinations of 0-9:
+*
+*   999999999999999999  1^18-1
+*  9223372036854775807  (1<<63)-1  (max int64_t)
+*  9999999999999999999  1^19-1     (would overflow)
+*/
+static const int64_t UPPER_BOUND = 1000000000000000000LL - 1LL;
+
+/** Helper function for ParseFixedPoint */
+static inline bool ProcessMantissaDigit(char ch, int64_t &mantissa, int &mantissa_tzeros)
+{
+    if(ch == '0')
+        ++mantissa_tzeros;
+    else {
+        for (int i=0; i<=mantissa_tzeros; ++i) {
+            if (mantissa > (UPPER_BOUND / 10LL))
+                return false; /* overflow */
+            mantissa *= 10;
+        }
+        mantissa += ch - '0';
+        mantissa_tzeros = 0;
+    }
+    return true;
+}
+
+bool ParseFixedPoint(const std::string &val, int decimals, int64_t *amount_out)
+{
+    int64_t mantissa = 0;
+    int64_t exponent = 0;
+    int mantissa_tzeros = 0;
+    bool mantissa_sign = false;
+    bool exponent_sign = false;
+    int ptr = 0;
+    int end = val.size();
+    int point_ofs = 0;
+
+    if (ptr < end && val[ptr] == '-') {
+        mantissa_sign = true;
+        ++ptr;
+    }
+    if (ptr < end)
+    {
+        if (val[ptr] == '0') {
+            /* pass single 0 */
+            ++ptr;
+        } else if (val[ptr] >= '1' && val[ptr] <= '9') {
+            while (ptr < end && IsDigit(val[ptr])) {
+                if (!ProcessMantissaDigit(val[ptr], mantissa, mantissa_tzeros))
+                    return false; /* overflow */
+                ++ptr;
+            }
+        } else return false; /* missing expected digit */
+    } else return false; /* empty string or loose '-' */
+    if (ptr < end && val[ptr] == '.')
+    {
+        ++ptr;
+        if (ptr < end && IsDigit(val[ptr]))
+        {
+            while (ptr < end && IsDigit(val[ptr])) {
+                if (!ProcessMantissaDigit(val[ptr], mantissa, mantissa_tzeros))
+                    return false; /* overflow */
+                ++ptr;
+                ++point_ofs;
+            }
+        } else return false; /* missing expected digit */
+    }
+    if (ptr < end && (val[ptr] == 'e' || val[ptr] == 'E'))
+    {
+        ++ptr;
+        if (ptr < end && val[ptr] == '+')
+            ++ptr;
+        else if (ptr < end && val[ptr] == '-') {
+            exponent_sign = true;
+            ++ptr;
+        }
+        if (ptr < end && IsDigit(val[ptr])) {
+            while (ptr < end && IsDigit(val[ptr])) {
+                if (exponent > (UPPER_BOUND / 10LL))
+                    return false; /* overflow */
+                exponent = exponent * 10 + val[ptr] - '0';
+                ++ptr;
+            }
+        } else return false; /* missing expected digit */
+    }
+    if (ptr != end)
+        return false; /* trailing garbage */
+
+    /* finalize exponent */
+    if (exponent_sign)
+        exponent = -exponent;
+    exponent = exponent - point_ofs + mantissa_tzeros;
+
+    /* finalize mantissa */
+    if (mantissa_sign)
+        mantissa = -mantissa;
+
+    /* convert to one 64-bit fixed-point value */
+    exponent += decimals;
+    if (exponent < 0)
+        return false; /* cannot represent values smaller than 10^-decimals */
+    if (exponent >= 18)
+        return false; /* cannot represent values larger than or equal to 10^(18-decimals) */
+
+    for (int i=0; i < exponent; ++i) {
+        if (mantissa > (UPPER_BOUND / 10LL) || mantissa < -(UPPER_BOUND / 10LL))
+            return false; /* overflow */
+        mantissa *= 10;
+    }
+    if (mantissa > UPPER_BOUND || mantissa < -UPPER_BOUND)
+        return false; /* overflow */
+
+    if (amount_out)
+        *amount_out = mantissa;
+
+    return true;
+}
+
+void Downcase(std::string& str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){return ToLower(c);});
+}
+
+std::string ToLower(const std::string& str)
+{
+    std::string r;
+    for (auto ch : str) r += ToLower((unsigned char)ch);
+    return r;
+}
+
+std::string ToUpper(const std::string& str)
+{
+    std::string r;
+    for (auto ch : str) r += ToUpper((unsigned char)ch);
+    return r;
+}
+
+std::string Capitalize(std::string str)
+{
+    if (str.empty()) return str;
+    str[0] = ToUpper(str.front());
+    return str;
+}
+
+std::string HexStr(const Span<const uint8_t> s)
+{
+    std::string rv;
+    static constexpr char hexmap[16] = { '0', '1', '2', '3', '4', '5', '6', '7',
+                                         '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+    rv.reserve(s.size() * 2);
+    for (uint8_t v: s) {
+        rv.push_back(hexmap[v >> 4]);
+        rv.push_back(hexmap[v & 15]);
+    }
+    return rv;
+}
+
+// Based on http://www.zedwood.com/article/cpp-is-valid-utf8-string-function
+bool IsValidUTF8(const std::string& str)
+{
+    const unsigned int strLen = str.length();
+    int c,n;
+    for (unsigned i = 0; i < strLen; i++) {
+        c = (unsigned char) str[i];
+        if (0x00 <= c && c <= 0x7f)     n=0;      // 0bbbbbbb (ASCII)
+        else if ((c & 0xE0) == 0xC0)    n=1;      // 110bbbbb
+        else if ( c == 0xED && i < (strLen - 1) && ((unsigned char)str[i+1] & 0xA0) == 0xA0)
+            return false;                         //U+d800 to U+dfff
+        else if ((c & 0xF0) == 0xE0)    n=2;      // 1110bbbb
+        else if ((c & 0xF8) == 0xF0)    n=3;      // 11110bbb
+        else return false;
+        for (int j=0; j < n && i < strLen; j++) { // n bytes matching 10bbbbbb follow ?
+            if ((++i == strLen) || (( (unsigned char)str[i] & 0xC0) != 0x80))
+                return false;
+        }
+    }
+    return true;
+}
+

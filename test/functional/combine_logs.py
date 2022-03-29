@@ -41,7 +41,6 @@ def main():
     log_events = read_logs(unknown_args[0])
 
     print_logs(log_events, color=args.color, html=args.html)
-
 def read_logs(tmp_dir):
     """Reads log files.
 

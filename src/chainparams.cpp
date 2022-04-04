@@ -95,7 +95,7 @@ static const CCheckpointData data = {
 };
 
 static MapCheckpoints mapCheckpointsTestnet = {
-    {0, uint256("0x001"))},
+    {0, uint256("0x001")},
 };
 static const CCheckpointData dataTestnet = {
     &mapCheckpointsTestnet,

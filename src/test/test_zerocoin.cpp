@@ -9,7 +9,6 @@
 #include "libzerocoin/Denominations.h"
 #include "amount.h"
 #include "chainparams.h"
-#include "main.h"
 #include "txdb.h"
 
 #include <boost/test/unit_test.hpp>

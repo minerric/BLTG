@@ -79,12 +79,12 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-const char * const PIVX_CONF_FILENAME = "bltg.conf";
-const char * const PIVX_PID_FILENAME = "bltg.pid";
-const char * const PIVX_MASTERNODE_CONF_FILENAME = "masternode.conf";
+const char * const BLTG_CONF_FILENAME = "bltg.conf";
+const char * const BLTG_PID_FILENAME = "bltg.pid";
+const char * const BLTG_MASTERNODE_CONF_FILENAME = "masternode.conf";
 
 
-// PIVX only features
+// BLTG only features
 // Masternode
 std::atomic<bool> fMasterNode{false};
 bool fLiteMode = false;
@@ -535,13 +535,13 @@ void PrintExceptionContinue(const std::exception* pex, const char* pszThread)
 
 fs::path GetDefaultDataDir()
 {
-// Windows < Vista: C:\Documents and Settings\Username\Application Data\PIVX
-// Windows >= Vista: C:\Users\Username\AppData\Roaming\PIVX
-// Mac: ~/Library/Application Support/PIVX
+// Windows < Vista: C:\Documents and Settings\Username\Application Data\BLTG
+// Windows >= Vista: C:\Users\Username\AppData\Roaming\BLTG
+// Mac: ~/Library/Application Support/BLTG
 // Unix: ~/.bltg
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "PIVX";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "BLTG";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -553,7 +553,7 @@ fs::path GetDefaultDataDir()
     // Mac
     pathRet /= "Library/Application Support";
     TryCreateDirectories(pathRet);
-    return pathRet / "PIVX";
+    return pathRet / "BLTG";
 #else
     // Unix
     return pathRet / ".bltg";
@@ -570,13 +570,13 @@ static RecursiveMutex csPathCached;
 static fs::path ZC_GetBaseParamsDir()
 {
     // Copied from GetDefaultDataDir and adapter for zcash params.
-    // Windows < Vista: C:\Documents and Settings\Username\Application Data\PIVXParams
-    // Windows >= Vista: C:\Users\Username\AppData\Roaming\PIVXParams
-    // Mac: ~/Library/Application Support/PIVXParams
+    // Windows < Vista: C:\Documents and Settings\Username\Application Data\BLTGParams
+    // Windows >= Vista: C:\Users\Username\AppData\Roaming\BLTGParams
+    // Mac: ~/Library/Application Support/BLTGParams
     // Unix: ~/.bltg-params
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "PIVXParams";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "BLTGParams";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -588,7 +588,7 @@ static fs::path ZC_GetBaseParamsDir()
     // Mac
     pathRet /= "Library/Application Support";
     TryCreateDirectories(pathRet);
-    return pathRet / "PIVXParams";
+    return pathRet / "BLTGParams";
 #else
     // Unix
     return pathRet / ".bltg-params";
@@ -772,7 +772,7 @@ fs::path GetConfigFile(const std::string& confPath)
 
 fs::path GetMasternodeConfigFile()
 {
-    fs::path pathConfigFile(gArgs.GetArg("-mnconf", PIVX_MASTERNODE_CONF_FILENAME));
+    fs::path pathConfigFile(gArgs.GetArg("-mnconf", BLTG_MASTERNODE_CONF_FILENAME));
     return AbsPathForConfigVal(pathConfigFile);
 }
 
@@ -872,7 +872,7 @@ std::string ArgsManager::GetChainName() const
 #ifndef WIN32
 fs::path GetPidFile()
 {
-    fs::path pathPidFile(gArgs.GetArg("-pid", PIVX_PID_FILENAME));
+    fs::path pathPidFile(gArgs.GetArg("-pid", BLTG_PID_FILENAME));
     return AbsPathForConfigVal(pathPidFile);
 }
 

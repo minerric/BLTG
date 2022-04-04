@@ -34,7 +34,7 @@ SettingsFaqWidget::SettingsFaqWidget(BLTGGUI* parent, ClientModel* _model) :
     // Content
     setCssProperty({
            ui->labelNumber_Intro,
-           ui->labelNumber_UnspendablePIV,
+           ui->labelNumber_UnspendableBLTG,
            ui->labelNumber_Stake,
            ui->labelNumber_Support,
            ui->labelNumber_Masternode,
@@ -43,7 +43,7 @@ SettingsFaqWidget::SettingsFaqWidget(BLTGGUI* parent, ClientModel* _model) :
 
     setCssProperty({
               ui->labelSubtitle_Intro,
-              ui->labelSubtitle_UnspendablePIV,
+              ui->labelSubtitle_UnspendableBLTG,
               ui->labelSubtitle_Stake,
               ui->labelSubtitle_Support,
               ui->labelSubtitle_Masternode,
@@ -53,7 +53,7 @@ SettingsFaqWidget::SettingsFaqWidget(BLTGGUI* parent, ClientModel* _model) :
 
     setCssProperty({
               ui->labelContent_Intro,
-              ui->labelContent_UnspendablePIV,
+              ui->labelContent_UnspendableBLTG,
               ui->labelContent_Stake,
               ui->labelContent_Support,
               ui->labelContent_Masternode,
@@ -63,7 +63,7 @@ SettingsFaqWidget::SettingsFaqWidget(BLTGGUI* parent, ClientModel* _model) :
 
     setCssProperty({
               ui->pushButton_Intro,
-              ui->pushButton_UnspendablePIV,
+              ui->pushButton_UnspendableBLTG,
               ui->pushButton_Stake,
               ui->pushButton_Support,
               ui->pushButton_Masternode,
@@ -75,31 +75,31 @@ SettingsFaqWidget::SettingsFaqWidget(BLTGGUI* parent, ClientModel* _model) :
     // Set FAQ content strings
     QString introContent = formatFAQContent(
         formatFAQParagraph(
-            tr("PIVX is a form of digital online money using blockchain technology "
+            tr("BLTG is a form of digital online money using blockchain technology "
                "that can be easily transferred globally, instantly, and with near "
-               "zero fees. PIVX incorporates market leading security & "
+               "zero fees. BLTG incorporates market leading security & "
                "privacy and is also the first PoS (Proof of Stake) Cryptocurrency "
                "to implement Sapling(SHIELD), a zk-SNARKs based privacy protocol.")) +
         formatFAQParagraph(
-            tr("PIVX utilizes a Proof of Stake (PoS) consensus system algorithm, "
-               "allowing all owners of PIVX to participate in earning block rewards "
+            tr("BLTG utilizes a Proof of Stake (PoS) consensus system algorithm, "
+               "allowing all owners of BLTG to participate in earning block rewards "
                "while securing the network with full node wallets, as well as to "
                "run Masternodes to create and vote on proposals.")));
     ui->labelContent_Intro->setText(introContent);
 
-    QString unspendablePIVContent = formatFAQContent(
+    QString unspendableBLTGContent = formatFAQContent(
         formatFAQParagraph(
-            tr("Newly received PIVX requires 6 confirmations on the network "
+            tr("Newly received BLTG requires 6 confirmations on the network "
                "to become eligible for spending which can take ~6 minutes.")) +
         formatFAQParagraph(
-            tr("Your PIVX wallet also needs to be completely synchronized "
+            tr("Your BLTG wallet also needs to be completely synchronized "
                "to see and spend balances on the network.")));
-    ui->labelContent_UnspendablePIV->setText(unspendablePIVContent);
+    ui->labelContent_UnspendableBLTG->setText(unspendableBLTGContent);
 
     QString stakeContent = formatFAQContent(
         formatFAQOrderedList(
             formatFAQListItem(tr("Make sure your wallet is completely synchronized and you are using the latest release.")) +
-            formatFAQListItem(tr("You must have a balance of PIVX with a minimum of 600 confirmations.")) +
+            formatFAQListItem(tr("You must have a balance of BLTG with a minimum of 600 confirmations.")) +
             formatFAQListItem(tr("Your wallet must stay online and be unlocked for staking purposes.")) +
             formatFAQListItem(tr("Once all those steps are followed staking should be enabled."))) +
         formatFAQParagraph(
@@ -137,10 +137,10 @@ SettingsFaqWidget::SettingsFaqWidget(BLTGGUI* parent, ClientModel* _model) :
         formatFAQParagraph(
             tr("Masternode Perks:") +
             formatFAQUnorderedList(
-                formatFAQListItem(tr("Participate in PIVX Governance")) +
+                formatFAQListItem(tr("Participate in BLTG Governance")) +
                 formatFAQListItem(tr("Earn Masternode Rewards")) +
                 formatFAQListItem(tr("Commodity option for future sale")) +
-                formatFAQListItem(tr("Help secure the PIVX network")))) +
+                formatFAQListItem(tr("Help secure the BLTG network")))) +
         formatFAQParagraph(
             tr("Requirements:") +
             formatFAQUnorderedList(
@@ -171,7 +171,7 @@ SettingsFaqWidget::SettingsFaqWidget(BLTGGUI* parent, ClientModel* _model) :
     // Buttons
     connect(ui->pushButtonExit, &QPushButton::clicked, this, &SettingsFaqWidget::close);
     connect(ui->pushButton_Intro, &QPushButton::clicked, [this](){onFaqClicked(ui->widget_Intro);});
-    connect(ui->pushButton_UnspendablePIV, &QPushButton::clicked, [this](){onFaqClicked(ui->widget_UnspendablePIV);});
+    connect(ui->pushButton_UnspendableBLTG, &QPushButton::clicked, [this](){onFaqClicked(ui->widget_UnspendableBLTG);});
     connect(ui->pushButton_Stake, &QPushButton::clicked, [this](){onFaqClicked(ui->widget_Stake);});
     connect(ui->pushButton_Support, &QPushButton::clicked, [this](){onFaqClicked(ui->widget_Support);});
     connect(ui->pushButton_Masternode, &QPushButton::clicked, [this](){onFaqClicked(ui->widget_Masternode);});
@@ -209,7 +209,7 @@ std::vector<QPushButton*> SettingsFaqWidget::getButtons()
 {
     return {
             ui->pushButton_Intro,
-            ui->pushButton_UnspendablePIV,
+            ui->pushButton_UnspendableBLTG,
             ui->pushButton_Stake,
             ui->pushButton_Support,
             ui->pushButton_Masternode,

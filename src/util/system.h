@@ -47,12 +47,12 @@ public:
     boost::signals2::signal<std::string (const char* psz)> Translate;
 };
 
-extern const char * const PIVX_CONF_FILENAME;
-extern const char * const PIVX_PID_FILENAME;
-extern const char * const PIVX_MASTERNODE_CONF_FILENAME;
+extern const char * const BLTG_CONF_FILENAME;
+extern const char * const BLTG_PID_FILENAME;
+extern const char * const BLTG_MASTERNODE_CONF_FILENAME;
 extern const char * const DEFAULT_DEBUGLOGFILE;
 
-//PIVX only features
+//BLTG only features
 
 extern std::atomic<bool> fMasterNode;
 extern bool fLiteMode;

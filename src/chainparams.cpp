@@ -72,7 +72,7 @@ static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits
  */
 static MapCheckpoints mapCheckpoints = {
 
-    {(}0, uint256("0x00000ccaa671bbab8d6f72eb853466d5af0e33491fddd2861d52b394553f96f9")},
+    {0, uint256("0x00000ccaa671bbab8d6f72eb853466d5af0e33491fddd2861d52b394553f96f9")},
 	{100, uint256("0x000002abbcebc30631f14e79d985a8c4b81d4441bbabe3e5f86b99b0e7b7660e")},
 	{500, uint256("0x922d74ba02ba0d95cf0f053dcd29524a8df38c97753d89d614dce5ed526b6ea2")},
 	{76901, uint256("0xa1a994c88e415a8e86a7fe2f6ba604d9743fdd77ac766d05da61eea7be2245aa")},

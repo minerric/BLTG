@@ -1,7 +1,7 @@
 <!--- Remove this description and sections that do not apply -->
 
 This issue tracker is only for technical issues related to BLTG Core.
-General BLTG questions and/or support requests and are best directed to the [BLTG Discord](https://discord.gg/a74C9aj).
+General BLTG questions and/or support requests and are best directed to the [BLTG Discord](https://discord.block-logic.com/).
 
 ### Describe the issue
 

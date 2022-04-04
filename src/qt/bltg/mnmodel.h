@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The PIVX developers
+// Copyright (c) 2019-2020 The PIVX developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -8,17 +8,20 @@
 #include <QAbstractTableModel>
 #include "masternode.h"
 #include "masternodeconfig.h"
+#include "qt/walletmodel.h"
 
 class MNModel : public QAbstractTableModel
 {
     Q_OBJECT
 
 public:
-    explicit MNModel(QObject *parent = nullptr);
+    explicit MNModel(QObject *parent);
     ~MNModel() override {
         nodes.clear();
         collateralTxAccepted.clear();
     }
+    void init();
+    void setWalletModel(WalletModel* _model) { walletModel = _model; };
 
     enum ColumnIndex {
         ALIAS = 0,  /**< User specified MN alias */
@@ -42,9 +45,23 @@ public:
     void updateMNList();
 
 
+    bool isMNsNetworkSynced();
+    // Returns the MN activeState field.
+    int getMNState(QString alias);
+    // Checks if the masternode is inactive
+    bool isMNInactive(QString mnAlias);
+    // Masternode is active if it's in PRE_ENABLED OR ENABLED state
+    bool isMNActive(QString mnAlias);
+    // Masternode collateral has enough confirmations
+    bool isMNCollateralMature(QString mnAlias);
+    // Validate string representing a masternode IP address
+    static bool validateMNIP(const QString& addrStr);
+
+
 private:
+    WalletModel* walletModel;
     // alias mn node ---> pair <ip, master node>
-    QMap<QString, std::pair<QString,CMasternode*>> nodes;
+    QMap<QString, std::pair<QString, CMasternode*>> nodes;
     QMap<std::string, bool> collateralTxAccepted;
 };
 

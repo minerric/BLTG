@@ -7,7 +7,7 @@ Setup
 
 Running
 ---------------------
-The following are some helpful notes on how to run BLTG on your native platform.
+The following are some helpful notes on how to run BLTG Core on your native platform.
 
 ### Unix
 
@@ -15,6 +15,8 @@ Unpack the files into a directory and run:
 
 - `bin/bltg-qt` (GUI) or
 - `bin/bltgd` (headless)
+
+If this is the first time running BLTG Core (since v3.1.1), you'll need to install the sapling params by running the included `install-params.sh` script, which copies the two params files to `$HOME/.bltg-params`
 
 ### Windows
 
@@ -26,9 +28,10 @@ Drag BLTG-Qt to your applications folder, and then run BLTG-Qt.
 
 ### Need Help?
 
-* See the documentation at the [BLTG Wiki](https://en.bitcoin.it/wiki/Main_Page) ***TODO***
+* See the documentation at the [BLTG Wiki](https://github.com/Block-Logic-Technology-Group/bltg/wiki) ***TODO***
 for help and more information.
-* Join our Discord server [Discord Server](https://discord.gg/RggfhTH)
+* Ask for help on [BitcoinTalk](https://bitcointalk.org/index.php?topic=2695744.260) or on the [BLTG Forum](https://forum.block-logic.com/).
+* Join our Discord server [Discord Server](https://discord.block-logic.com/)
 
 Building
 ---------------------
@@ -42,7 +45,7 @@ The following are developer notes on how to build BLTG on your native platform. 
 
 Development
 ---------------------
-The Bltg repo's [root README](/README.md) contains relevant information on the development process and automated testing.
+The BLTG repo's [root README](/README.md) contains relevant information on the development process and automated testing.
 
 - [Developer Notes](developer-notes.md)
 - [Multiwallet Qt Development](multiwallet-qt.md)
@@ -55,11 +58,14 @@ The Bltg repo's [root README](/README.md) contains relevant information on the d
 - [Dnsseed Policy](dnsseed-policy.md)
 
 ### Resources
-* Join the [BLTG Discord](https://discord.gg/RggfhTH).
+* Discuss on the [BitcoinTalk](https://bitcointalk.org/index.php?topic=2695744.260) or the [BLTG](https://forum.block-logic.com/) forum.
+* Join the [BLTG Discord](https://discord.block-logic.com/).
 
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)
 - [Files](files.md)
+- [Fuzz-testing](fuzzing.md)
+- [Reduce Memory](reduce-memory.md)
 - [Tor Support](tor.md)
 - [Init Scripts (systemd/upstart/openrc)](init.md)
 

@@ -1,6 +1,5 @@
 // Copyright (c) 2011-2013 The Bitcoin developers
-// Copyright (c) 2017-2019 The PIVX developers
-// Copyright (c) 2018-2022 The BLTG developers
+// Copyright (c) 2017-2020 The PIVX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -8,13 +7,10 @@
 #define BITCOIN_QT_OPTIONSMODEL_H
 
 #include "amount.h"
+#include <cstdint>
 
 #include <QAbstractListModel>
 #include <QSettings>
-
-QT_BEGIN_NAMESPACE
-class QNetworkProxy;
-QT_END_NAMESPACE
 
 /** Interface from Qt to configuration data structure for BLTG client.
    To Qt, the options are presented as a list with the different options
@@ -33,6 +29,7 @@ public:
         StartAtStartup,      // bool
         MinimizeToTray,      // bool
         MapPortUPnP,         // bool
+        MapPortNatpmp,       // bool
         MinimizeOnClose,     // bool
         ProxyUse,            // bool
         ProxyIP,             // QString
@@ -50,13 +47,13 @@ public:
         ZeromintAddresses,   // bool
         ZeromintPercentage,  // int
         ZeromintPrefDenom,   // int
+        HideCharts,          // bool
         HideZeroBalances,    // bool
         HideOrphans,    // bool
         AnonymizeBltgAmount, //int
         ShowMasternodesTab,  // bool
         Listen,              // bool
-        StakeSplitThreshold, // int
-        ShowColdStakingScreen, // bool
+        ShowColdStakingScreen,  // bool
         OptionIDRowCount,
     };
 
@@ -69,17 +66,16 @@ public:
     void refreshDataView();
     /** Updates current unit in memory, settings and emits displayUnitChanged(newUnit) signal */
     void setDisplayUnit(const QVariant& value);
-    /* Update StakeSplitThreshold's value in wallet */
-    void setStakeSplitThreshold(int value);
 
     /* Explicit getters */
+    bool isHideCharts() { return fHideCharts; }
     bool getMinimizeToTray() { return fMinimizeToTray; }
     bool getMinimizeOnClose() { return fMinimizeOnClose; }
     int getDisplayUnit() { return nDisplayUnit; }
     QString getThirdPartyTxUrls() { return strThirdPartyTxUrls; }
-    bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() { return fCoinControlFeatures; }
     const QString& getOverriddenByCommandLine() { return strOverriddenByCommandLine; }
+    const QString& getLang() { return language; }
 
     /* Restart flag helper */
     void setRestartRequired(bool fRequired);
@@ -112,6 +108,7 @@ private:
     QString strThirdPartyTxUrls;
     bool fCoinControlFeatures;
     bool showColdStakingScreen;
+    bool fHideCharts;
     bool fHideZeroBalances;
     bool fHideOrphans;
     /* settings that were overriden by command-line */
@@ -120,15 +117,11 @@ private:
     /// Add option to list of GUI options overridden through command line/config file
     void addOverriddenOption(const std::string& option);
 
-signals:
+Q_SIGNALS:
     void displayUnitChanged(int unit);
-    void zeromintEnableChanged(bool);
-    void zeromintAddressesChanged(bool);
-    void zeromintPercentageChanged(int);
-    void preferredDenomChanged(int);
-    void anonymizeBltgAmountChanged(int);
     void coinControlFeaturesChanged(bool);
     void showHideColdStakingScreen(bool);
+    void hideChartsChanged(bool);
     void hideZeroBalancesChanged(bool);
     void hideOrphansChanged(bool);
 };

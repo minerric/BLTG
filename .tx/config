@@ -1,0 +1,7 @@
+[main]
+host = https://www.transifex.com
+
+[bltg-project-translations.qt-translation-54x]
+file_filter = src/qt/locale/bltg_<lang>.ts
+source_file = src/qt/locale/bltg_en.ts
+source_lang = en

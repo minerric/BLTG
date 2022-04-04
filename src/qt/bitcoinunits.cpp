@@ -1,12 +1,13 @@
 // Copyright (c) 2011-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2019 The PIVX developers
-// Copyright (c) 2022 The BLTG developers
+// Copyright (c) 2015-2020 The PIVX developers
+// Copyright (c) 2018-2022 The BLTG developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "bitcoinunits.h"
 #include "chainparams.h"
+#include "policy/feerate.h"
 #include "primitives/transaction.h"
 
 #include <QSettings>
@@ -56,27 +57,28 @@ QString BitcoinUnits::id(int unit)
 
 QString BitcoinUnits::name(int unit, bool isZbltg)
 {
+    const QString CURR_UNIT = QString(CURRENCY_UNIT.c_str());
     QString z = "";
     if(isZbltg) z = "z";
-    if (Params().NetworkID() == CBaseChainParams::MAIN) {
+    if (Params().NetworkIDString() == CBaseChainParams::MAIN) {
         switch (unit) {
         case BLTG:
-            return z + QString("BLTG");
+            return z + CURR_UNIT;
         case mBLTG:
-            return z + QString("mBLTG");
+            return z + QString("m") + CURR_UNIT;
         case uBLTG:
-            return z + QString::fromUtf8("μBLTG");
+            return z + QString::fromUtf8("μ") + CURR_UNIT;
         default:
             return QString("???");
         }
     } else {
         switch (unit) {
         case BLTG:
-            return z + QString("tBLTG");
+            return z + QString("t") + CURR_UNIT;
         case mBLTG:
-            return z + QString("mtBLTG");
+            return z + QString("mt") + CURR_UNIT;
         case uBLTG:
-            return z + QString::fromUtf8("μtBLTG");
+            return z + QString::fromUtf8("μt") + CURR_UNIT;
         default:
             return QString("???");
         }
@@ -85,25 +87,26 @@ QString BitcoinUnits::name(int unit, bool isZbltg)
 
 QString BitcoinUnits::description(int unit)
 {
-    if (Params().NetworkID() == CBaseChainParams::MAIN) {
+    const QString CURR_UNIT = QString(CURRENCY_UNIT.c_str());
+    if (Params().NetworkIDString() == CBaseChainParams::MAIN) {
         switch (unit) {
         case BLTG:
-            return QString("BLTG");
+            return CURR_UNIT;
         case mBLTG:
-            return QString("Milli-BLTG (1 / 1" THIN_SP_UTF8 "000)");
+            return QString("Milli-") + CURR_UNIT + QString(" (1 / 1" THIN_SP_UTF8 "000)");
         case uBLTG:
-            return QString("Micro-BLTG (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            return QString("Micro-") + CURR_UNIT + QString(" (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
         default:
             return QString("???");
         }
     } else {
         switch (unit) {
         case BLTG:
-            return QString("TestBLTGs");
+            return QString("Test") + CURR_UNIT;
         case mBLTG:
-            return QString("Milli-TestBLTG (1 / 1" THIN_SP_UTF8 "000)");
+            return QString("Milli-Test") + CURR_UNIT + QString(" (1 / 1" THIN_SP_UTF8 "000)");
         case uBLTG:
-            return QString("Micro-TestBLTG (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            return QString("Micro-Test") + CURR_UNIT + QString(" (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
         default:
             return QString("???");
         }
@@ -309,5 +312,5 @@ QVariant BitcoinUnits::data(const QModelIndex& index, int role) const
 
 CAmount BitcoinUnits::maxMoney()
 {
-    return Params().MaxMoneyOut();
+    return Params().GetConsensus().nMaxMoneyOut;
 }

@@ -8,7 +8,7 @@
 # /etc/bltg/bltg.conf
 
 [Unit]
-Description=bltg daemon
+Description=BLTG daemon
 After=network.target
 
 [Service]

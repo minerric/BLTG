@@ -5,6 +5,7 @@ It is possible to run BLTG Core as a Tor onion service, and connect to such serv
 The following directions assume you have a Tor proxy running on port 9050. Many distributions default to having a SOCKS proxy listening on port 9050, but others may not. In particular, the Tor Browser Bundle defaults to listening on port 9150. See [Tor Project FAQ:TBBSocksPort](https://www.torproject.org/docs/faq.html.en#TBBSocksPort) for how to properly
 configure Tor.
 
+## Compatibility
 
 - Starting with version 5.3.0, BLTG Core only supports Tor version 3 hidden
   services (Tor v3). Tor v2 addresses are ignored by BLTG Core and neither
@@ -25,7 +26,7 @@ information in the debug log about your Tor configuration.
 CLI `-addrinfo` returns the number of addresses known to your node per network
 type, including Tor v2 and v3. This is useful to see how many onion addresses
 are known to your node for `-onlynet=onion` and how many Tor v3 addresses it
-knows when upgrading to BLTG Core v5.3.0 and up that supports Tor v3 only.
+knows when upgrading to BLTG Core v4.0.0 and up that supports Tor v3 only.
 
 ## 1. Run BLTG Core behind a Tor proxy
 
@@ -64,7 +65,7 @@ outgoing connections, but more is possible.
 
 In a typical situation, this suffices to run behind a Tor proxy:
 
-	./bltgd -proxy=127.0.0.1:9050
+    ./bltgd -proxy=127.0.0.1:9050
 
 ## 2. Automatically create a BLTG Core onion service
 
@@ -195,30 +196,30 @@ should be equal to binding address and port for inbound Tor connections (127.0.0
 
 In a typical situation, where you're only reachable via Tor, this should suffice:
 
-	./bltgd -proxy=127.0.0.1:9050 -externalip=bltgzj6l4cvo2fxy.onion -listen
+    ./bltgd -proxy=127.0.0.1:9050 -externalip=7zvj7a2imdgkdbg4f2dryd5rgtrn7ubltgr5eeij4cicjh65pooxeshid.onion -listen
 
 (obviously, replace the .onion address with your own). It should be noted that you still
 listen on all devices and another node could establish a clearnet connection, when knowing
 your address. To mitigate this, additionally bind the address of your Tor proxy:
 
-	./bltgd ... -bind=127.0.0.1
+    ./bltgd ... -bind=127.0.0.1
 
 If you don't care too much about hiding your node, and want to be reachable on IPv4
 as well, use `discover` instead:
 
-	./bltgd ... -discover
+    ./bltgd ... -discover
 
 and open port 17127 on your firewall (or use port mapping, i.e., `-upnp` or `-natpmp`).
 
 If you only want to use Tor to reach .onion addresses, but not use it as a proxy
 for normal IPv4/IPv6 communication, use:
 
-    ./bltgd -onion=127.0.0.1:9050 -externalip=7zvj7a2imdgkdbg4f2dryd5rgtrn7upivr5eeij4cicjh65pooxeshid.onion -discover
+    ./bltgd -onion=127.0.0.1:9050 -externalip=7zvj7a2imdgkdbg4f2dryd5rgtrn7ubltgr5eeij4cicjh65pooxeshid.onion -discover
 
 ## 4. Privacy recommendations
 
 - Do not add anything but BLTG Core ports to the onion service created in section 3.
   If you run a web service too, create a new onion service for that.
   Otherwise it is trivial to link them, which may reduce privacy. Onion
-  services created automatically (as in section2) always have only one port
+  services created automatically (as in section 2) always have only one port
   open.

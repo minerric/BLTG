@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The PIVX developers
+// Copyright (c) 2019-2020 The PIVX developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,26 +10,29 @@
 
 #include "qt/guiutil.h"
 #include "clientmodel.h"
+#include "interfaces/handler.h"
 #include "optionsmodel.h"
 #include "networkstyle.h"
 #include "notificator.h"
 #include "guiinterface.h"
 #include "qt/bltg/qtutils.h"
 #include "qt/bltg/defaultdialog.h"
-#include "qt/bltg/settings/settingsfaqwidget.h"
+#include "shutdown.h"
+#include "util/system.h"
 
-#include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QApplication>
 #include <QColor>
-#include <QShortcut>
+#include <QHBoxLayout>
 #include <QKeySequence>
+#include <QScreen>
+#include <QShortcut>
 #include <QWindowStateChangeEvent>
 
-#include "util.h"
 
 #define BASE_WINDOW_WIDTH 1200
 #define BASE_WINDOW_HEIGHT 740
+#define BASE_WINDOW_MIN_HEIGHT 620
+#define BASE_WINDOW_MIN_WIDTH 1100
 
 
 const QString BLTGGUI::DEFAULT_WALLET = "~Default";
@@ -40,38 +43,43 @@ BLTGGUI::BLTGGUI(const NetworkStyle* networkStyle, QWidget* parent) :
 
     /* Open CSS when configured */
     this->setStyleSheet(GUIUtil::loadStyleSheet());
-    this->setMinimumSize(BASE_WINDOW_WIDTH, BASE_WINDOW_HEIGHT);
-    GUIUtil::restoreWindowGeometry("nWindow", QSize(BASE_WINDOW_WIDTH, BASE_WINDOW_HEIGHT), this);
+    this->setMinimumSize(BASE_WINDOW_MIN_WIDTH, BASE_WINDOW_MIN_HEIGHT);
+
+
+    // Adapt screen size
+    QRect rec = QGuiApplication::primaryScreen()->geometry();
+    int adaptedHeight = (rec.height() < BASE_WINDOW_HEIGHT) ?  BASE_WINDOW_MIN_HEIGHT : BASE_WINDOW_HEIGHT;
+    int adaptedWidth = (rec.width() < BASE_WINDOW_WIDTH) ?  BASE_WINDOW_MIN_WIDTH : BASE_WINDOW_WIDTH;
+    GUIUtil::restoreWindowGeometry(
+            "nWindow",
+            QSize(adaptedWidth, adaptedHeight),
+            this
+    );
 
 #ifdef ENABLE_WALLET
     /* if compiled with wallet support, -disablewallet can still disable the wallet */
-    enableWallet = !GetBoolArg("-disablewallet", false);
+    enableWallet = !gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET);
 #else
     enableWallet = false;
 #endif // ENABLE_WALLET
 
-    QString windowTitle = tr("BLTG Core") + " - ";
-    windowTitle += ((enableWallet) ? tr("Wallet") : tr("Node"));
+    QString windowTitle = QString::fromStdString(gArgs.GetArg("-windowtitle", ""));
+    if (windowTitle.isEmpty()) {
+        windowTitle = QString{PACKAGE_NAME} + " - ";
+        windowTitle += ((enableWallet) ? tr("Wallet") : tr("Node"));
+    }
     windowTitle += " " + networkStyle->getTitleAddText();
     setWindowTitle(windowTitle);
 
-#ifndef Q_OS_MAC
     QApplication::setWindowIcon(networkStyle->getAppIcon());
     setWindowIcon(networkStyle->getAppIcon());
-#else
-    MacDockIconHandler::instance()->setIcon(networkStyle->getAppIcon());
-#endif
-
-
-
 
 #ifdef ENABLE_WALLET
     // Create wallet frame
-    if(enableWallet){
-
+    if (enableWallet) {
         QFrame* centralWidget = new QFrame(this);
-        this->setMinimumWidth(BASE_WINDOW_WIDTH);
-        this->setMinimumHeight(BASE_WINDOW_HEIGHT);
+        this->setMinimumWidth(BASE_WINDOW_MIN_WIDTH);
+        this->setMinimumHeight(BASE_WINDOW_MIN_HEIGHT);
         QHBoxLayout* centralWidgetLayouot = new QHBoxLayout();
         centralWidget->setLayout(centralWidgetLayouot);
         centralWidgetLayouot->setContentsMargins(0,0,0,0);
@@ -115,9 +123,9 @@ BLTGGUI::BLTGGUI(const NetworkStyle* networkStyle, QWidget* parent) :
         sendWidget = new SendWidget(this);
         receiveWidget = new ReceiveWidget(this);
         addressesWidget = new AddressesWidget(this);
-        privacyWidget = new PrivacyWidget(this);
         masterNodesWidget = new MasterNodesWidget(this);
         coldStakingWidget = new ColdStakingWidget(this);
+        governancewidget = new GovernanceWidget(this);
         settingsWidget = new SettingsWidget(this);
 
         // Add to parent
@@ -125,9 +133,9 @@ BLTGGUI::BLTGGUI(const NetworkStyle* networkStyle, QWidget* parent) :
         stackedContainer->addWidget(sendWidget);
         stackedContainer->addWidget(receiveWidget);
         stackedContainer->addWidget(addressesWidget);
-        stackedContainer->addWidget(privacyWidget);
         stackedContainer->addWidget(masterNodesWidget);
         stackedContainer->addWidget(coldStakingWidget);
+        stackedContainer->addWidget(governancewidget);
         stackedContainer->addWidget(settingsWidget);
         stackedContainer->setCurrentWidget(dashboard);
 
@@ -158,7 +166,8 @@ BLTGGUI::BLTGGUI(const NetworkStyle* networkStyle, QWidget* parent) :
 
 }
 
-void BLTGGUI::createActions(const NetworkStyle* networkStyle){
+void BLTGGUI::createActions(const NetworkStyle* networkStyle)
+{
     toggleHideAction = new QAction(networkStyle->getAppIcon(), tr("&Show / Hide"), this);
     toggleHideAction->setStatusTip(tr("Show or hide the main Window"));
 
@@ -167,14 +176,15 @@ void BLTGGUI::createActions(const NetworkStyle* networkStyle){
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
 
-    connect(toggleHideAction, SIGNAL(triggered()), this, SLOT(toggleHidden()));
-    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(toggleHideAction, &QAction::triggered, this, &BLTGGUI::toggleHidden);
+    connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
 }
 
 /**
  * Here add every event connection
  */
-void BLTGGUI::connectActions() {
+void BLTGGUI::connectActions()
+{
     QShortcut *consoleShort = new QShortcut(this);
     consoleShort->setKey(QKeySequence(SHORT_KEY + Qt::Key_C));
     connect(consoleShort, &QShortcut::activated, [this](){
@@ -189,19 +199,21 @@ void BLTGGUI::connectActions() {
     connect(sendWidget, &SendWidget::showHide, this, &BLTGGUI::showHide);
     connect(receiveWidget, &ReceiveWidget::showHide, this, &BLTGGUI::showHide);
     connect(addressesWidget, &AddressesWidget::showHide, this, &BLTGGUI::showHide);
-    connect(privacyWidget, &PrivacyWidget::showHide, this, &BLTGGUI::showHide);
     connect(masterNodesWidget, &MasterNodesWidget::showHide, this, &BLTGGUI::showHide);
     connect(masterNodesWidget, &MasterNodesWidget::execDialog, this, &BLTGGUI::execDialog);
     connect(coldStakingWidget, &ColdStakingWidget::showHide, this, &BLTGGUI::showHide);
     connect(coldStakingWidget, &ColdStakingWidget::execDialog, this, &BLTGGUI::execDialog);
+    connect(governancewidget, &GovernanceWidget::showHide, this, &BLTGGUI::showHide);
+    connect(governancewidget, &GovernanceWidget::execDialog, this, &BLTGGUI::execDialog);
     connect(settingsWidget, &SettingsWidget::execDialog, this, &BLTGGUI::execDialog);
 }
 
 
-void BLTGGUI::createTrayIcon(const NetworkStyle* networkStyle) {
+void BLTGGUI::createTrayIcon(const NetworkStyle* networkStyle)
+{
 #ifndef Q_OS_MAC
     trayIcon = new QSystemTrayIcon(this);
-    QString toolTip = tr("BLTG Core client") + " " + networkStyle->getTitleAddText();
+    QString toolTip = tr("%1 client").arg(PACKAGE_NAME) + " " + networkStyle->getTitleAddText();
     trayIcon->setToolTip(toolTip);
     trayIcon->setIcon(networkStyle->getAppIcon());
     trayIcon->hide();
@@ -209,8 +221,8 @@ void BLTGGUI::createTrayIcon(const NetworkStyle* networkStyle) {
     notificator = new Notificator(QApplication::applicationName(), trayIcon, this);
 }
 
-//
-BLTGGUI::~BLTGGUI() {
+BLTGGUI::~BLTGGUI()
+{
     // Unsubscribe from notifications from core
     unsubscribeFromCoreSignals();
 
@@ -224,16 +236,17 @@ BLTGGUI::~BLTGGUI() {
 
 
 /** Get restart command-line parameters and request restart */
-void BLTGGUI::handleRestart(QStringList args){
+void BLTGGUI::handleRestart(QStringList args)
+{
     if (!ShutdownRequested())
-        emit requestedRestart(args);
+        Q_EMIT requestedRestart(args);
 }
 
 
-void BLTGGUI::setClientModel(ClientModel* clientModel) {
-    this->clientModel = clientModel;
-    if(this->clientModel) {
-
+void BLTGGUI::setClientModel(ClientModel* _clientModel)
+{
+    this->clientModel = _clientModel;
+    if (this->clientModel) {
         // Create system tray menu (or setup the dock menu) that late to prevent users from calling actions,
         // while the client has not yet fully loaded
         createTrayIconMenu();
@@ -241,12 +254,18 @@ void BLTGGUI::setClientModel(ClientModel* clientModel) {
         topBar->setClientModel(clientModel);
         dashboard->setClientModel(clientModel);
         sendWidget->setClientModel(clientModel);
+        masterNodesWidget->setClientModel(clientModel);
         settingsWidget->setClientModel(clientModel);
+        governancewidget->setClientModel(clientModel);
 
         // Receive and report messages from client model
-        connect(clientModel, SIGNAL(message(QString, QString, unsigned int)), this, SLOT(message(QString, QString, unsigned int)));
-        connect(topBar, SIGNAL(walletSynced(bool)), dashboard, SLOT(walletSynced(bool)));
-        connect(topBar, SIGNAL(walletSynced(bool)), coldStakingWidget, SLOT(walletSynced(bool)));
+        connect(clientModel, &ClientModel::message, this, &BLTGGUI::message);
+        connect(clientModel, &ClientModel::alertsChanged, [this](const QString& _alertStr) {
+            message(tr("Alert!"), _alertStr, CClientUIInterface::MSG_WARNING);
+        });
+        connect(topBar, &TopBar::walletSynced, dashboard, &DashboardWidget::walletSynced);
+        connect(topBar, &TopBar::walletSynced, coldStakingWidget, &ColdStakingWidget::walletSynced);
+        connect(topBar, &TopBar::tierTwoSynced, governancewidget, &GovernanceWidget::tierTwoSynced);
 
         // Get restart command-line parameters and handle restart
         connect(settingsWidget, &SettingsWidget::handleRestart, [this](QStringList arg){handleRestart(arg);});
@@ -268,29 +287,31 @@ void BLTGGUI::setClientModel(ClientModel* clientModel) {
     }
 }
 
-void BLTGGUI::createTrayIconMenu() {
+void BLTGGUI::createTrayIconMenu()
+{
 #ifndef Q_OS_MAC
-    // return if trayIcon is unset (only on non-Mac OSes)
+    // return if trayIcon is unset (only on non-macOSes)
     if (!trayIcon)
         return;
 
     trayIconMenu = new QMenu(this);
     trayIcon->setContextMenu(trayIconMenu);
 
-    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-            this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
+    connect(trayIcon, &QSystemTrayIcon::activated, this, &BLTGGUI::trayIconActivated);
 #else
-    // Note: On Mac, the dock icon is used to provide the tray's functionality.
+    // Note: On macOS, the Dock icon is used to provide the tray's functionality.
     MacDockIconHandler* dockIconHandler = MacDockIconHandler::instance();
-    dockIconHandler->setMainWindow((QMainWindow*)this);
-    trayIconMenu = dockIconHandler->dockMenu();
+    connect(dockIconHandler, &MacDockIconHandler::dockIconClicked, this, &BLTGGUI::macosDockIconActivated);
+
+    trayIconMenu = new QMenu(this);
+    trayIconMenu->setAsDockMenu();
 #endif
 
-    // Configuration of the tray icon (or dock icon) icon menu
+    // Configuration of the tray icon (or Dock icon) icon menu
     trayIconMenu->addAction(toggleHideAction);
     trayIconMenu->addSeparator();
 
-#ifndef Q_OS_MAC // This is built-in on Mac
+#ifndef Q_OS_MAC // This is built-in on macOS
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
 #endif
@@ -304,6 +325,12 @@ void BLTGGUI::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
         toggleHidden();
     }
 }
+#else
+void BLTGGUI::macosDockIconActivated()
+ {
+     show();
+     activateWindow();
+ }
 #endif
 
 void BLTGGUI::changeEvent(QEvent* e)
@@ -314,7 +341,10 @@ void BLTGGUI::changeEvent(QEvent* e)
         if (clientModel && clientModel->getOptionsModel() && clientModel->getOptionsModel()->getMinimizeToTray()) {
             QWindowStateChangeEvent* wsevt = static_cast<QWindowStateChangeEvent*>(e);
             if (!(wsevt->oldState() & Qt::WindowMinimized) && isMinimized()) {
-                QTimer::singleShot(0, this, SLOT(hide()));
+                QTimer::singleShot(0, this, &BLTGGUI::hide);
+                e->ignore();
+            } else if ((wsevt->oldState() & Qt::WindowMinimized) && !isMinimized()) {
+                QTimer::singleShot(0, this, &BLTGGUI::show);
                 e->ignore();
             }
         }
@@ -328,23 +358,29 @@ void BLTGGUI::closeEvent(QCloseEvent* event)
     if (clientModel && clientModel->getOptionsModel()) {
         if (!clientModel->getOptionsModel()->getMinimizeOnClose()) {
             QApplication::quit();
+        } else {
+            QMainWindow::showMinimized();
+            event->ignore();
         }
     }
-#endif
+#else
     QMainWindow::closeEvent(event);
+#endif
 }
 
 
-void BLTGGUI::messageInfo(const QString& text){
-    if(!this->snackBar) this->snackBar = new SnackBar(this, this);
+void BLTGGUI::messageInfo(const QString& text)
+{
+    if (!this->snackBar) this->snackBar = new SnackBar(this, this);
     this->snackBar->setText(text);
     this->snackBar->resize(this->width(), snackBar->height());
     openDialog(this->snackBar, this);
 }
 
 
-void BLTGGUI::message(const QString& title, const QString& message, unsigned int style, bool* ret) {
-    QString strTitle =  tr("BLTG Core"); // default title
+void BLTGGUI::message(const QString& title, const QString& message, unsigned int style, bool* ret)
+{
+    QString strTitle = QString{PACKAGE_NAME}; // default title
     // Default to information icon
     int nNotifyIcon = Notificator::Information;
 
@@ -382,26 +418,27 @@ void BLTGGUI::message(const QString& title, const QString& message, unsigned int
         // Check for buttons, use OK as default, if none was supplied
         int r = 0;
         showNormalIfMinimized();
-        if(style & CClientUIInterface::BTN_MASK){
+        if (style & CClientUIInterface::BTN_MASK) {
             r = openStandardDialog(
                     (title.isEmpty() ? strTitle : title), message, "OK", "CANCEL"
                 );
-        }else{
+        } else {
             r = openStandardDialog((title.isEmpty() ? strTitle : title), message, "OK");
         }
         if (ret != NULL)
             *ret = r;
-    } else if(style & CClientUIInterface::MSG_INFORMATION_SNACK){
+    } else if (style & CClientUIInterface::MSG_INFORMATION_SNACK) {
         messageInfo(message);
-    }else {
+    } else {
         // Append title to "BLTG - "
         if (!msgType.isEmpty())
             strTitle += " - " + msgType;
-        notificator->notify((Notificator::Class) nNotifyIcon, strTitle, message);
+        notificator->notify(static_cast<Notificator::Class>(nNotifyIcon), strTitle, message);
     }
 }
 
-bool BLTGGUI::openStandardDialog(QString title, QString body, QString okBtn, QString cancelBtn){
+bool BLTGGUI::openStandardDialog(QString title, QString body, QString okBtn, QString cancelBtn)
+{
     DefaultDialog *dialog;
     if (isVisible()) {
         showHide(true);
@@ -412,7 +449,7 @@ bool BLTGGUI::openStandardDialog(QString title, QString body, QString okBtn, QSt
     } else {
         dialog = new DefaultDialog();
         dialog->setText(title, body, okBtn);
-        dialog->setWindowTitle(tr("BLTG Core"));
+        dialog->setWindowTitle(PACKAGE_NAME);
         dialog->adjustSize();
         dialog->raise();
         dialog->exec();
@@ -423,28 +460,24 @@ bool BLTGGUI::openStandardDialog(QString title, QString body, QString okBtn, QSt
 }
 
 
-void BLTGGUI::showNormalIfMinimized(bool fToggleHidden) {
+void BLTGGUI::showNormalIfMinimized(bool fToggleHidden)
+{
     if (!clientModel)
         return;
-    // activateWindow() (sometimes) helps with keyboard focus on Windows
-    if (isHidden()) {
-        show();
-        activateWindow();
-    } else if (isMinimized()) {
-        showNormal();
-        activateWindow();
-    } else if (GUIUtil::isObscured(this)) {
-        raise();
-        activateWindow();
-    } else if (fToggleHidden)
+    if (!isHidden() && !isMinimized() && !GUIUtil::isObscured(this) && fToggleHidden) {
         hide();
+    } else {
+        GUIUtil::bringToFront(this);
+    }
 }
 
-void BLTGGUI::toggleHidden() {
+void BLTGGUI::toggleHidden()
+{
     showNormalIfMinimized(true);
 }
 
-void BLTGGUI::detectShutdown() {
+void BLTGGUI::detectShutdown()
+{
     if (ShutdownRequested()) {
         if (rpcConsole)
             rpcConsole->hide();
@@ -452,82 +485,106 @@ void BLTGGUI::detectShutdown() {
     }
 }
 
-void BLTGGUI::goToDashboard(){
-    if(stackedContainer->currentWidget() != dashboard){
+void BLTGGUI::goToDashboard()
+{
+    if (stackedContainer->currentWidget() != dashboard) {
         stackedContainer->setCurrentWidget(dashboard);
         topBar->showBottom();
     }
 }
 
-void BLTGGUI::goToSend(){
+void BLTGGUI::goToSend()
+{
     showTop(sendWidget);
 }
 
-void BLTGGUI::goToAddresses(){
+void BLTGGUI::goToAddresses()
+{
     showTop(addressesWidget);
 }
 
-void BLTGGUI::goToPrivacy(){
-    showTop(privacyWidget);
-}
-
-void BLTGGUI::goToMasterNodes(){
+void BLTGGUI::goToMasterNodes()
+{
     showTop(masterNodesWidget);
 }
 
-void BLTGGUI::goToColdStaking(){
+void BLTGGUI::goToColdStaking()
+{
     showTop(coldStakingWidget);
+}
+
+void BLTGGUI::goToGovernance()
+{
+    showTop(governancewidget);
 }
 
 void BLTGGUI::goToSettings(){
     showTop(settingsWidget);
 }
 
-void BLTGGUI::goToReceive(){
+void BLTGGUI::goToSettingsInfo()
+{
+    navMenu->selectSettings();
+    settingsWidget->showInformation();
+    goToSettings();
+}
+
+void BLTGGUI::goToReceive()
+{
     showTop(receiveWidget);
 }
 
-void BLTGGUI::showTop(QWidget* view){
-    if(stackedContainer->currentWidget() != view){
+void BLTGGUI::openNetworkMonitor()
+{
+    settingsWidget->openNetworkMonitor();
+}
+
+void BLTGGUI::showTop(QWidget* view)
+{
+    if (stackedContainer->currentWidget() != view) {
         stackedContainer->setCurrentWidget(view);
         topBar->showTop();
     }
 }
 
-void BLTGGUI::changeTheme(bool isLightTheme){
+void BLTGGUI::changeTheme(bool isLightTheme)
+{
 
     QString css = GUIUtil::loadStyleSheet();
     this->setStyleSheet(css);
 
     // Notify
-    emit themeChanged(isLightTheme, css);
+    Q_EMIT themeChanged(isLightTheme, css);
 
     // Update style
     updateStyle(this);
 }
 
-void BLTGGUI::resizeEvent(QResizeEvent* event){
+void BLTGGUI::resizeEvent(QResizeEvent* event)
+{
     // Parent..
     QMainWindow::resizeEvent(event);
     // background
     showHide(opEnabled);
     // Notify
-    emit windowResizeEvent(event);
+    Q_EMIT windowResizeEvent(event);
 }
 
-bool BLTGGUI::execDialog(QDialog *dialog, int xDiv, int yDiv){
+bool BLTGGUI::execDialog(QDialog *dialog, int xDiv, int yDiv)
+{
     return openDialogWithOpaqueBackgroundY(dialog, this);
 }
 
-void BLTGGUI::showHide(bool show){
-    if(!op) op = new QLabel(this);
-    if(!show){
+void BLTGGUI::showHide(bool show)
+{
+    if (!op) op = new QLabel(this);
+    if (!show) {
         op->setVisible(false);
         opEnabled = false;
-    }else{
+    } else {
         QColor bg("#000000");
         bg.setAlpha(200);
-        if(!isLightTheme()){
+        if (!isLightTheme()) {
             bg = QColor("#00000000");
             bg.setAlpha(150);
         }
@@ -546,24 +603,39 @@ void BLTGGUI::showHide(bool show){
     }
 }
 
-int BLTGGUI::getNavWidth(){
+int BLTGGUI::getNavWidth()
+{
     return this->navMenu->width();
 }
 
-void BLTGGUI::openFAQ(int section){
+void BLTGGUI::openFAQ(SettingsFaqWidget::Section section)
+{
     showHide(true);
-    SettingsFaqWidget* dialog = new SettingsFaqWidget(this);
-    if (section > 0) dialog->setSection(section);
+    SettingsFaqWidget* dialog = new SettingsFaqWidget(this, clientModel);
+    dialog->setSection(section);
     openDialogWithOpaqueBackgroundFullScreen(dialog, this);
     dialog->deleteLater();
 }
 
 
 #ifdef ENABLE_WALLET
+void BLTGGUI::setGovModel(GovernanceModel* govModel)
+{
+    if (!stackedContainer || !clientModel) return;
+    governancewidget->setGovModel(govModel);
+}
+
+void BLTGGUI::setMNModel(MNModel* mnModel)
+{
+    if (!stackedContainer || !clientModel) return;
+    governancewidget->setMNModel(mnModel);
+    masterNodesWidget->setMNModel(mnModel);
+}
+
 bool BLTGGUI::addWallet(const QString& name, WalletModel* walletModel)
 {
     // Single wallet supported for now..
-    if(!stackedContainer || !clientModel || !walletModel)
+    if (!stackedContainer || !clientModel || !walletModel)
         return false;
 
     // set the model for every view
@@ -573,41 +645,45 @@ bool BLTGGUI::addWallet(const QString& name, WalletModel* walletModel)
     receiveWidget->setWalletModel(walletModel);
     sendWidget->setWalletModel(walletModel);
     addressesWidget->setWalletModel(walletModel);
-    privacyWidget->setWalletModel(walletModel);
     masterNodesWidget->setWalletModel(walletModel);
     coldStakingWidget->setWalletModel(walletModel);
+    governancewidget->setWalletModel(walletModel);
     settingsWidget->setWalletModel(walletModel);
 
     // Connect actions..
-    connect(privacyWidget, &PrivacyWidget::message, this, &BLTGGUI::message);
+    connect(walletModel, &WalletModel::message, this, &BLTGGUI::message);
     connect(masterNodesWidget, &MasterNodesWidget::message, this, &BLTGGUI::message);
-    connect(coldStakingWidget, &MasterNodesWidget::message, this, &BLTGGUI::message);
+    connect(coldStakingWidget, &ColdStakingWidget::message, this, &BLTGGUI::message);
     connect(topBar, &TopBar::message, this, &BLTGGUI::message);
     connect(sendWidget, &SendWidget::message,this, &BLTGGUI::message);
     connect(receiveWidget, &ReceiveWidget::message,this, &BLTGGUI::message);
     connect(addressesWidget, &AddressesWidget::message,this, &BLTGGUI::message);
+    connect(governancewidget, &GovernanceWidget::message,this, &BLTGGUI::message);
     connect(settingsWidget, &SettingsWidget::message, this, &BLTGGUI::message);
 
     // Pass through transaction notifications
-    connect(dashboard, SIGNAL(incomingTransaction(QString, int, CAmount, QString, QString)), this, SLOT(incomingTransaction(QString, int, CAmount, QString, QString)));
+    connect(dashboard, &DashboardWidget::incomingTransaction, this, &BLTGGUI::incomingTransaction);
 
     return true;
 }
 
-bool BLTGGUI::setCurrentWallet(const QString& name) {
+bool BLTGGUI::setCurrentWallet(const QString& name)
+{
     // Single wallet supported.
     return true;
 }
 
-void BLTGGUI::removeAllWallets() {
+void BLTGGUI::removeAllWallets()
+{
     // Single wallet supported.
 }
 
-void BLTGGUI::incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address) {
+void BLTGGUI::incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address)
+{
     // Only send notifications when not disabled
-    if(!bdisableSystemnotifications){
+    if (!bdisableSystemnotifications) {
         // On new transaction, make an info balloon
-        message((amount) < 0 ? (pwalletMain->fMultiSendNotify == true ? tr("Sent MultiSend transaction") : tr("Sent transaction")) : tr("Incoming transaction"),
+        message(amount < 0 ? tr("Sent transaction") : tr("Incoming transaction"),
             tr("Date: %1\n"
                "Amount: %2\n"
                "Type: %3\n"
@@ -617,8 +693,6 @@ void BLTGGUI::incomingTransaction(const QString& date, int unit, const CAmount& 
                 .arg(type)
                 .arg(address),
             CClientUIInterface::MSG_INFORMATION);
-
-        pwalletMain->fMultiSendNotify = false;
     }
 }
 
@@ -647,11 +721,11 @@ static bool ThreadSafeMessageBox(BLTGGUI* gui, const std::string& message, const
 void BLTGGUI::subscribeToCoreSignals()
 {
     // Connect signals to client
-    uiInterface.ThreadSafeMessageBox.connect(boost::bind(ThreadSafeMessageBox, this, _1, _2, _3));
+    m_handler_message_box = interfaces::MakeHandler(uiInterface.ThreadSafeMessageBox.connect(std::bind(ThreadSafeMessageBox, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
 }
 
 void BLTGGUI::unsubscribeFromCoreSignals()
 {
     // Disconnect signals from client
-    uiInterface.ThreadSafeMessageBox.disconnect(boost::bind(ThreadSafeMessageBox, this, _1, _2, _3));
+    m_handler_message_box->disconnect();
 }

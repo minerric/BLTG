@@ -16,14 +16,14 @@ BEGIN
     BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
-            VALUE "CompanyName",        "Bltg"
-            VALUE "FileDescription",    "Bltg-cli (OSS RPC client for Bltg)"
+            VALUE "CompanyName",        "BLTG"
+            VALUE "FileDescription",    "bltg-cli (OSS RPC client for " PACKAGE_NAME ")"
             VALUE "FileVersion",        VER_FILEVERSION_STR
             VALUE "InternalName",       "bltg-cli"
             VALUE "LegalCopyright",     COPYRIGHT_STR
             VALUE "LegalTrademarks1",   "Distributed under the MIT/X11 software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php."
             VALUE "OriginalFilename",   "bltg-cli.exe"
-            VALUE "ProductName",        "Bltg-cli"
+            VALUE "ProductName",        "bltg-cli"
             VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
         END
     END

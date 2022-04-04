@@ -1,18 +1,22 @@
-// Copyright (c) 2019 The PIVX developers
+// Copyright (c) 2019-2020 The PIVX developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef MASTERNODESWIDGET_H
 #define MASTERNODESWIDGET_H
 
-#include <QWidget>
 #include "qt/bltg/pwidget.h"
 #include "qt/bltg/furabstractlistitemdelegate.h"
-#include "qt/bltg/mnmodel.h"
 #include "qt/bltg/tooltipmenu.h"
+#include "walletmodel.h"
+
+#include <atomic>
+
 #include <QTimer>
+#include <QWidget>
 
 class BLTGGUI;
+class MNModel;
 
 namespace Ui {
 class MasterNodesWidget;
@@ -30,19 +34,24 @@ public:
 
     explicit MasterNodesWidget(BLTGGUI *parent = nullptr);
     ~MasterNodesWidget();
+    void setMNModel(MNModel* _mnModel);
 
-    void loadWalletModel() override;
+    void run(int type) override;
+    void onError(QString error, int type) override;
+
     void showEvent(QShowEvent *event) override;
     void hideEvent(QHideEvent *event) override;
 
-private slots:
+private Q_SLOTS:
     void onCreateMNClicked();
+    void onStartAllClicked(int type);
     void changeTheme(bool isLightTheme, QString &theme) override;
     void onMNClicked(const QModelIndex &index);
     void onEditMNClicked();
     void onDeleteMNClicked();
     void onInfoMNClicked();
     void updateListState();
+    void updateModelAndInform(const QString& informText);
 
 private:
     Ui::MasterNodesWidget *ui;
@@ -52,7 +61,11 @@ private:
     QModelIndex index;
     QTimer *timer = nullptr;
 
-    void startAlias(QString strAlias);
+    std::atomic<bool> isLoading;
+
+    bool checkMNsNetwork();
+    void startAlias(const QString& strAlias);
+    bool startAll(QString& failedMN, bool onlyMissing);
 };
 
 #endif // MASTERNODESWIDGET_H

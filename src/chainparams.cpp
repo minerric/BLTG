@@ -95,8 +95,10 @@ static const CCheckpointData data = {
 };
 
 static MapCheckpoints mapCheckpointsTestnet = {
-    {0, uint256("0x001")},
+    {0, uint256S("0x001")},
+    //{    201, uint256S("6ae7d52092fd918c8ac8d9b1334400387d3057997e6e927a88e57186dc395231")},     // v5 activation (PoS/Sapling)
 };
+
 static const CCheckpointData dataTestnet = {
     &mapCheckpointsTestnet,
     1454124731,
@@ -117,7 +119,7 @@ public:
     {
         strNetworkID = "main";
 
-        genesis = CreateGenesisBlock(1531154631;, 1568802;, 0x1e0ffff0;, 1, 250 * COIN);
+        genesis = CreateGenesisBlock(1531154631, 1568802, 0x1e0ffff0, 1, 250 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock == uint256S("0x00000ccaa671bbab8d6f72eb853466d5af0e33491fddd2861d52b394553f96f9"));
         assert(genesis.hashMerkleRoot == uint256S("0xe456c7b894fe91492a94361376809abe1b7894ca75cbe30641b309e6d9d6b0a0"));

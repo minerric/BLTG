@@ -85,7 +85,7 @@ static MapCheckpoints mapCheckpoints = {
     {600000, uint256("0x3f464393ad2e76350e3bf79de1380b14c074bfccc53fd5bded4bde8ec91377cb")},
     {650000, uint256("0x196c3c94eb298b1e341b2b4f5cb0ed407f303f9394ab3598ab182453f50a4fea")},
     {686116, uint256("0x11fac5d54cd40af34847fa49b050a833bade32b55f68e016a0564f364a347d5f")},
-    };
+};
 
 static const CCheckpointData data = {
     &mapCheckpoints,

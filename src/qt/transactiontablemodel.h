@@ -11,12 +11,6 @@
 #include <QAbstractTableModel>
 #include <QStringList>
 
-#include <memory>
-
-namespace interfaces {
-    class Handler;
-}
-
 class TransactionRecord;
 class TransactionTablePriv;
 class WalletModel;
@@ -30,9 +24,8 @@ class TransactionTableModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    explicit TransactionTableModel(CWallet* wallet, WalletModel* parent = nullptr);
-    ~TransactionTableModel() override;
-    void init();
+    explicit TransactionTableModel(CWallet* wallet, WalletModel* parent = 0);
+    ~TransactionTableModel();
 
     enum ColumnIndex {
         Status = 0,
@@ -55,12 +48,16 @@ public:
         WatchonlyRole,
         /** Watch-only icon */
         WatchonlyDecorationRole,
+        /** Long description (HTML format) */
+        LongDescriptionRole,
         /** Address of transaction */
         AddressRole,
         /** Label of address related to transaction */
         LabelRole,
         /** Net amount of transaction */
         AmountRole,
+        /** Unique identifier */
+        TxIDRole,
         /** Transaction hash */
         TxHashRole,
         /** Is transaction confirmed? */
@@ -69,36 +66,28 @@ public:
         FormattedAmountRole,
         /** Transaction status (TransactionRecord::Status) */
         StatusRole,
-        /** Credit amount of transaction */
-        ShieldedCreditAmountRole,
         /** Transaction size in bytes */
         SizeRole
     };
 
-    int rowCount(const QModelIndex& parent) const override;
-    int columnCount(const QModelIndex& parent) const override;
+    int rowCount(const QModelIndex& parent) const;
+    int columnCount(const QModelIndex& parent) const;
     int size() const;
-    QVariant data(const QModelIndex& index, int role) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
-    bool processingQueuedTransactions() const { return fProcessingQueuedTransactions; }
+    bool hasZcTxes();
+    QVariant data(const QModelIndex& index, int role) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
+    bool processingQueuedTransactions() { return fProcessingQueuedTransactions; }
 
-Q_SIGNALS:
-    // Emitted only during startup when records gets parsed
-    void txLoaded(const QString& hash, const int txType, const int txStatus);
-    // Emitted when a transaction that belongs to this wallet gets connected to the chain and/or committed locally.
-    void txArrived(const QString& hash, const bool isCoinStake, const bool isMNReward, const bool isCSAnyType);
+signals:
+    void txArrived(const QString& hash, const bool& isCoinStake, const bool& isCSAnyType);
 
 private:
-    // Listeners
-    std::unique_ptr<interfaces::Handler> m_handler_transaction_changed;
-    std::unique_ptr<interfaces::Handler> m_handler_show_progress;
-
-    CWallet* wallet{nullptr};
-    WalletModel* walletModel{nullptr};
-    QStringList columns{};
-    TransactionTablePriv* priv{nullptr};
-    bool fProcessingQueuedTransactions{false};
+    CWallet* wallet;
+    WalletModel* walletModel;
+    QStringList columns;
+    TransactionTablePriv* priv;
+    bool fProcessingQueuedTransactions;
 
     void subscribeToCoreSignals();
     void unsubscribeFromCoreSignals();
@@ -115,7 +104,7 @@ private:
     QVariant txWatchonlyDecoration(const TransactionRecord* wtx) const;
     QVariant txAddressDecoration(const TransactionRecord* wtx) const;
 
-public Q_SLOTS:
+public slots:
     /* New transaction, or transaction changed status */
     void updateTransaction(const QString& hash, int status, bool showTransaction);
     void updateConfirmations();

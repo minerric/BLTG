@@ -28,15 +28,13 @@ class ContactsDropdown : public PWidget
 {
     Q_OBJECT
 public:
-    explicit ContactsDropdown(int minWidth, int minHeight, PWidget* parent = nullptr);
-    ContactsDropdown(int minWidth, int minHeight, BLTGGUI* _window = nullptr,
-                     QWidget* parent = nullptr);
+    explicit ContactsDropdown(int minWidth, int minHeight, PWidget *parent = nullptr);
 
     void resizeList(int minWidth, int mintHeight);
-    void setWalletModel(WalletModel* _model, const QStringList& type);
-    void setType(const QStringList& type);
+    void setWalletModel(WalletModel* _model, const QString& type);
+    void setType(const QString& type);
     void changeTheme(bool isLightTheme, QString& theme) override;
-Q_SIGNALS:
+signals:
     void contactSelected(QString address, QString label);
 private:
     FurAbstractListItemDelegate* delegate = nullptr;
@@ -44,8 +42,7 @@ private:
     AddressFilterProxyModel *filter = nullptr;
     QListView *list;
     QFrame *frameList;
-    void init(int minWidth, int minHeight);
-private Q_SLOTS:
+private slots:
     void handleClick(const QModelIndex &index);
 };
 

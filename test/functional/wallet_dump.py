@@ -6,7 +6,7 @@
 
 import os
 
-from test_framework.test_framework import BltgTestFramework
+from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import (assert_equal, assert_raises_rpc_error)
 
 
@@ -24,62 +24,32 @@ def read_dump(file_name, addrs, hd_master_addr_old):
             # only read non comment lines
             if line[0] != "#" and len(line) > 10:
                 # split out some data
-                key_date_label, comment = line.split("#")
-                key_date_label = key_date_label.split(" ")
-
-                date = key_date_label[1]
-                keytype = key_date_label[2]
-
-                imported_key = date == '1970-01-01T00:00:01Z'
-                if imported_key:
-                    # Imported keys have multiple addresses, no label (keypath) and timestamp
-                    # Skip them
-                    continue
-
-                addr_keypath = comment.split(" addr=")[1]
-                addr = addr_keypath.split(" ")[0]
-                keypath = None
-
-                if keytype == "hdseed=1":
-                    # ensure we have generated a new hd master key
-                    assert hd_master_addr_old != addr
-                    hd_master_addr_ret = addr
-                elif keytype == "script=1":
-                    # scripts don't have keypaths
-                    keypath = None
-                else:
-                    keypath = addr_keypath.rstrip().split("hdkeypath=")[1]
+                key_label, comment = line.split("#")
+                # key = key_label.split(" ")[0]
+                keytype = key_label.split(" ")[2]
+                addr = comment.split(" addr=")[1].strip()
 
                 # count key types
-                for addrObj in addrs:
-                    if addrObj['address'] == addr.split(",")[0] and addrObj['hdkeypath'] == keypath and keytype == "label=":
-                        if addr.startswith('x') or addr.startswith('y'):
-                            # P2PKH address
-                            found_addr += 1
-                        # else: todo: add staking/anonymous addresses here
-                        break
-                    elif keytype == "change=1":
-                        found_addr_chg += 1
-                        break
-                    elif keytype == "reserve=1":
-                        found_addr_rsv += 1
-                        break
-
+                if addr in addrs:
+                    found_addr += 1
+                elif keytype == "change=1":
+                    found_addr_chg += 1
+                elif keytype == "reserve=1":
+                    found_addr_rsv += 1
         return found_addr, found_addr_chg, found_addr_rsv, hd_master_addr_ret
 
 
-class WalletDumpTest(BltgTestFramework):
+class WalletDumpTest(BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
         self.extra_args = [["-keypool=90"]]
-        self.rpc_timewait = 90
 
     def setup_network(self, split=False):
         # Use 1 minute timeout because the initial getnewaddress RPC can take
         # longer than the default 30 seconds due to an expensive
         # CWallet::TopUpKeyPool call, and the encryptwallet RPC made later in
         # the test often takes even longer.
-        self.add_nodes(self.num_nodes, extra_args=self.extra_args)
+        self.add_nodes(self.num_nodes, self.extra_args, timewait=60)
         self.start_nodes()
 
     def run_test (self):
@@ -90,21 +60,20 @@ class WalletDumpTest(BltgTestFramework):
         addrs = []
         for i in range(0,test_addr_count):
             addr = self.nodes[0].getnewaddress()
-            vaddr = self.nodes[0].getaddressinfo(addr)  # required to get hd keypath
-            addrs.append(vaddr)
+            #vaddr= self.nodes[0].validateaddress(addr) #required to get hd keypath
+            addrs.append(addr)
         # Should be a no-op:
         self.nodes[0].keypoolrefill()
 
         # dump unencrypted wallet
-        dumpUnencrypted = os.path.join(tmpdir, "node0", "wallet.unencrypted.dump")
-        result = self.nodes[0].dumpwallet(dumpUnencrypted)
-        assert_equal(result['filename'], os.path.abspath(dumpUnencrypted))
+        result = self.nodes[0].dumpwallet(tmpdir + "/node0/wallet.unencrypted.dump")
+        assert_equal(result['filename'], os.path.abspath(tmpdir + "/node0/wallet.unencrypted.dump"))
 
         found_addr, found_addr_chg, found_addr_rsv, hd_master_addr_unenc = \
-            read_dump(dumpUnencrypted, addrs, None)
+            read_dump(tmpdir + "/node0/wallet.unencrypted.dump", addrs, None)
         assert_equal(found_addr, test_addr_count)  # all keys must be in the dump
-        assert_equal(found_addr_chg, 50)  # 50 blocks where mined
-        assert_equal(found_addr_rsv, 90 * 3)  # 90 keys external plus 100% internal keys plus 100% staking keys
+        assert_equal(found_addr_chg, 0)  # 0 blocks where mined
+        assert_equal(found_addr_rsv, 90 + 1)  # keypool size (TODO: fix off-by-one)
 
         #encrypt wallet, restart, unlock and dump
         self.nodes[0].node_encrypt_wallet('test')
@@ -112,21 +81,13 @@ class WalletDumpTest(BltgTestFramework):
         self.nodes[0].walletpassphrase('test', 10)
         # Should be a no-op:
         self.nodes[0].keypoolrefill()
-        dumpEncrypted = os.path.join(tmpdir, "node0", "wallet.encrypted.dump")
-        self.nodes[0].dumpwallet(dumpEncrypted)
+        self.nodes[0].dumpwallet(tmpdir + "/node0/wallet.encrypted.dump")
 
         found_addr, found_addr_chg, found_addr_rsv, hd_master_addr_enc = \
-            read_dump(dumpEncrypted, addrs, hd_master_addr_unenc)
+            read_dump(tmpdir + "/node0/wallet.encrypted.dump", addrs, hd_master_addr_unenc)
         assert_equal(found_addr, test_addr_count)
-        assert_equal(found_addr_chg, 90 * 3 + 1 + 50)  # old reserve keys are marked as change now. todo: The +1 needs to be removed once this is updated (master seed taken as an internal key)
-        assert_equal(found_addr_rsv, 90 * 3) # 90 external + 90 internal + 90 staking
-
-        # Overwriting should fail
-        assert_raises_rpc_error(-8, "already exists", self.nodes[0].dumpwallet, dumpUnencrypted)
-
-        # Keyword matching should fail
-        assert_raises_rpc_error(-1, "Scam attempt detected!", self.nodes[0].dumpwallet, "debug")
-        assert_raises_rpc_error(-1, "Scam attempt detected!", self.nodes[0].dumpwallet, "wallet.log")
+        assert_equal(found_addr_chg, 90 + 1)  # old reserve keys are marked as change now
+        assert_equal(found_addr_rsv, 90 + 1)  # keypool size (TODO: fix off-by-one)
 
 if __name__ == '__main__':
     WalletDumpTest().main ()

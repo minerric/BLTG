@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>518</width>
-    <height>440</height>
+    <width>511</width>
+    <height>434</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string notr="true">N/A</string>
+   <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -47,7 +47,7 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="spacing">
-         <number>20</number>
+         <number>0</number>
         </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -62,14 +62,14 @@
             <item>
              <widget class="QLabel" name="labelTitle">
               <property name="text">
-               <string>Display</string>
+               <string>TextLabel</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QLabel" name="labelSubtitle1">
               <property name="text">
-               <string>Customize the display view options</string>
+               <string>TextLabel</string>
               </property>
               <property name="wordWrap">
                <bool>true</bool>
@@ -81,11 +81,27 @@
          </layout>
         </item>
         <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <widget class="QLabel" name="labelTitleLanguage">
             <property name="text">
-             <string>Language</string>
+             <string>TextLabel</string>
             </property>
            </widget>
           </item>
@@ -121,11 +137,27 @@
          </layout>
         </item>
         <item>
+         <spacer name="verticalThreads2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalPercentagezBltg">
           <item>
            <widget class="QLabel" name="labelTitleUnit">
             <property name="text">
-             <string>Unit to show amount</string>
+             <string>TextLabel</string>
             </property>
            </widget>
           </item>
@@ -161,11 +193,27 @@
          </layout>
         </item>
         <item>
+         <spacer name="verticalDenomzBltg">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalDenomzBltg">
           <item>
            <widget class="QLabel" name="labelTitleDigits">
             <property name="text">
-             <string>Decimal digits</string>
+             <string>TextLabel</string>
             </property>
            </widget>
           </item>
@@ -201,15 +249,20 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalHideCharts">
-          <item>
-           <widget class="QCheckBox" name="checkBoxHideCharts">
-            <property name="text">
-             <string>Hide stake charts in the dashboard</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Minimum</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>14</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item>
          <widget class="QPushButton" name="pushButtonSwitchBalance">
@@ -223,12 +276,28 @@
            <enum>Qt::NoFocus</enum>
           </property>
           <property name="text">
-           <string>Hide empty balances</string>
+           <string/>
           </property>
           <property name="checkable">
            <bool>true</bool>
           </property>
          </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Preferred</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>14</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1">
@@ -238,7 +307,7 @@
           <item>
            <widget class="QLabel" name="labelTitleUrl">
             <property name="text">
-             <string>Third party transactions URLs</string>
+             <string>TextLabel</string>
             </property>
            </widget>
           </item>
@@ -274,7 +343,7 @@
          </spacer>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalReset">
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
           <property name="spacing">
            <number>12</number>
           </property>

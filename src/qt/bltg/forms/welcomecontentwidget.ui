@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string notr="true">N/A</string>
+   <string></string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -267,7 +267,7 @@
                  </property>
                  <property name="maximumSize">
                   <size>
-                   <width>140</width>
+                   <width>16777215</width>
                    <height>1</height>
                   </size>
                  </property>
@@ -353,7 +353,7 @@
                  </property>
                  <property name="maximumSize">
                   <size>
-                   <width>140</width>
+                   <width>16777215</width>
                    <height>1</height>
                   </size>
                  </property>
@@ -439,7 +439,7 @@
                  </property>
                  <property name="maximumSize">
                   <size>
-                   <width>160</width>
+                   <width>16777215</width>
                    <height>1</height>
                   </size>
                  </property>
@@ -715,7 +715,7 @@
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
-                      <width>20</width>
+                      <width>40</width>
                       <height>20</height>
                      </size>
                     </property>
@@ -725,7 +725,7 @@
                    <widget class="QPushButton" name="pushName4">
                     <property name="minimumSize">
                      <size>
-                      <width>150</width>
+                      <width>110</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -759,7 +759,7 @@
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
-                      <width>76</width>
+                      <width>96</width>
                       <height>20</height>
                      </size>
                     </property>
@@ -937,7 +937,7 @@
                      </property>
                      <property name="text">
                       <string>Welcome to
-%1 Wallet</string>
+BLTG Core Wallet</string>
                      </property>
                      <property name="alignment">
                       <set>Qt::AlignCenter</set>
@@ -963,7 +963,7 @@
                    <item alignment="Qt::AlignHCenter">
                     <widget class="QLabel" name="labelMessage2">
                      <property name="text">
-                      <string>BLTG is the world’s most innovative Proof of Stake blockchain based technology. Developed by a team of highly experienced developers and cryptographers.</string>
+                      <string>PIVX is the world’s most innovative Proof of Stake blockchain based technology. Developed by a team of highly experienced developers and cryptographers.</string>
                      </property>
                      <property name="alignment">
                       <set>Qt::AlignHCenter|Qt::AlignTop</set>

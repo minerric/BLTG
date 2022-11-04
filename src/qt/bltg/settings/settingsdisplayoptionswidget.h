@@ -25,12 +25,8 @@ public:
     void initLanguages();
     void loadClientModel() override;
 
-public Q_SLOTS:
+public slots:
     void onResetClicked();
-
-Q_SIGNALS:
-    void saveSettings();
-    void discardSettings();
 
 private:
     Ui::SettingsDisplayOptionsWidget *ui;

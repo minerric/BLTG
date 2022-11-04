@@ -9,7 +9,7 @@
 
 #include <QDialog>
 #include "qt/bltg/prunnable.h"
-#include "support/allocators/secure.h"
+#include "allocators.h"
 #include <QCheckBox>
 
 class WalletModel;
@@ -45,6 +45,8 @@ public:
         ToggleLock,     /** Toggle wallet lock state */
         ChangePass,     /** Change passphrase */
         Send_BLTG,       /** Send BLTG */
+        Send_zBLTG,      /** Send zBLTG */
+        Mint_zBLTG,      /** Mint zBLTG */
         BIP_38,         /** BIP38 menu */
         Multi_Sig,      /** Multi-Signature dialog */
         Sign_Message,   /** Sign/verify message dialog */
@@ -64,15 +66,13 @@ private:
     Context context;
     bool fCapsLock;
     SecureString newpassCache = "";
-
-    void updateWarningsLabel();
     void run(int type) override;
     void onError(QString error, int type) override;
     QCheckBox *btnWatch;
 
     void initWatch(QWidget *parent);
 
-private Q_SLOTS:
+private slots:
     void onWatchClicked();
     void textChanged();
     void warningMessage();

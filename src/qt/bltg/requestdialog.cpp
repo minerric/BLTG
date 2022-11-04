@@ -8,10 +8,12 @@
 
 #include "qt/bltg/qtutils.h"
 #include "guiutil.h"
+#include "amount.h"
+#include "pairresult.h"
 #include "optionsmodel.h"
 
 RequestDialog::RequestDialog(QWidget *parent) :
-    FocusedDialog(parent),
+    QDialog(parent),
     ui(new Ui::RequestDialog)
 {
     ui->setupUi(this);
@@ -20,7 +22,10 @@ RequestDialog::RequestDialog(QWidget *parent) :
     setCssProperty(ui->frame, "container-dialog");
 
     // Text
+    ui->labelTitle->setText(tr("New Request Payment"));
     setCssProperty(ui->labelTitle, "text-title-dialog");
+
+    ui->labelMessage->setText(tr("Instead of only sharing a BLTG address, you can create a Payment Request message which bundles up more information than is contained in just a BLTG address."));
     setCssProperty(ui->labelMessage, "text-main-grey");
 
     // Combo Coins
@@ -28,16 +33,23 @@ RequestDialog::RequestDialog(QWidget *parent) :
     setCssProperty(ui->comboContainer, "container-purple");
 
     // Label
+    ui->labelSubtitleLabel->setText(tr("Label"));
     setCssProperty(ui->labelSubtitleLabel, "text-title2-dialog");
+    ui->lineEditLabel->setPlaceholderText(tr("Enter a label to be saved within the address"));
     setCssEditLineDialog(ui->lineEditLabel, true);
 
     // Amount
+    ui->labelSubtitleAmount->setText(tr("Amount"));
     setCssProperty(ui->labelSubtitleAmount, "text-title2-dialog");
+    ui->lineEditAmount->setPlaceholderText("0.00 BLTG");
     setCssEditLineDialog(ui->lineEditAmount, true);
     GUIUtil::setupAmountWidget(ui->lineEditAmount, this);
 
     // Description
+    ui->labelSubtitleDescription->setText(tr("Description (optional)"));
     setCssProperty(ui->labelSubtitleDescription, "text-title2-dialog");
+
+    ui->lineEditDescription->setPlaceholderText(tr("Add description "));
     setCssEditLineDialog(ui->lineEditDescription, true);
 
     // Stack
@@ -50,26 +62,24 @@ RequestDialog::RequestDialog(QWidget *parent) :
     // Buttons
     setCssProperty(ui->btnEsc, "ic-close");
     setCssProperty(ui->btnCancel, "btn-dialog-cancel");
+    ui->btnSave->setText(tr("GENERATE"));
     setCssBtnPrimary(ui->btnSave);
     setCssBtnPrimary(ui->btnCopyAddress);
     setCssBtnPrimary(ui->btnCopyUrl);
 
-    connect(ui->btnCancel, &QPushButton::clicked, this, &RequestDialog::close);
-    connect(ui->btnEsc, &QPushButton::clicked, this, &RequestDialog::close);
-    connect(ui->btnSave, &QPushButton::clicked, this, &RequestDialog::accept);
+    connect(ui->btnCancel, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->btnEsc, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->btnSave, SIGNAL(clicked()), this, SLOT(onNextClicked()));
     // TODO: Change copy address for save image (the method is already implemented in other class called exportQr or something like that)
-    connect(ui->btnCopyAddress, &QPushButton::clicked, this, &RequestDialog::onCopyClicked);
-    connect(ui->btnCopyUrl, &QPushButton::clicked, this, &RequestDialog::onCopyUriClicked);
+    connect(ui->btnCopyAddress, SIGNAL(clicked()), this, SLOT(onCopyClicked()));
+    connect(ui->btnCopyUrl, SIGNAL(clicked()), this, SLOT(onCopyUriClicked()));
 }
 
-void RequestDialog::setWalletModel(WalletModel *model)
-{
+void RequestDialog::setWalletModel(WalletModel *model){
     this->walletModel = model;
-    ui->comboBoxCoin->setText(BitcoinUnits::name(this->walletModel->getOptionsModel()->getDisplayUnit()));
 }
 
-void RequestDialog::setPaymentRequest(bool isPaymentRequest)
-{
+void RequestDialog::setPaymentRequest(bool isPaymentRequest) {
     this->isPaymentRequest = isPaymentRequest;
     if (!this->isPaymentRequest) {
         ui->labelMessage->setText(tr("Creates an address to receive coin delegations and be able to stake them."));
@@ -78,25 +88,29 @@ void RequestDialog::setPaymentRequest(bool isPaymentRequest)
     }
 }
 
-void RequestDialog::accept()
-{
-    if (walletModel) {
+void RequestDialog::onNextClicked(){
+    if(walletModel) {
+
         QString labelStr = ui->lineEditLabel->text();
+
+        //Amount
+        int displayUnit = walletModel->getOptionsModel()->getDisplayUnit();
+        bool isValueValid = true;
+        CAmount value = (ui->lineEditAmount->text().isEmpty() ?
+                            0 :
+                            GUIUtil::parseValue(ui->lineEditAmount->text(), displayUnit, &isValueValid)
+                        );
 
         if (!this->isPaymentRequest) {
             // Add specific checks for cold staking address creation
             if (labelStr.isEmpty()) {
-                inform(tr("Address label cannot be empty"));
+                inform("Address label cannot be empty");
                 return;
             }
         }
 
-        int displayUnit = walletModel->getOptionsModel()->getDisplayUnit();
-        auto value = ui->lineEditAmount->text().isEmpty() ? -1 :
-                GUIUtil::parseValue(ui->lineEditAmount->text(), displayUnit);
-
-        if (value <= 0) {
-            inform(tr("Invalid amount"));
+        if (value < 0 || !isValueValid) {
+            inform("Invalid amount");
             return;
         }
 
@@ -109,22 +123,23 @@ void RequestDialog::accept()
         std::string label = info->label.isEmpty() ? "" : info->label.toStdString();
         QString title;
 
-        CallResult<Destination> r;
+        CBitcoinAddress address;
+        PairResult r(false);
         if (this->isPaymentRequest) {
-            r = walletModel->getNewAddress(label);
-            title = tr("Request for ") + BitcoinUnits::format(displayUnit, info->amount, false, BitcoinUnits::separatorAlways) + " " + BitcoinUnits::name(displayUnit);
+            r = walletModel->getNewAddress(address, label);
+            title = "Request for " + BitcoinUnits::format(displayUnit, value, false, BitcoinUnits::separatorAlways) + " BLTG";
         } else {
-            r = walletModel->getNewStakingAddress(label);
-            title = tr("Cold Staking Address Generated");
+            r = walletModel->getNewStakingAddress(address, label);
+            title = "Cold Staking Address Generated";
         }
 
-        if (!r) {
+        if (!r.result) {
             // TODO: notify user about this error
             close();
             return;
         }
 
-        info->address = QString::fromStdString(r.getObjResult()->ToString());
+        info->address = QString::fromStdString(address.ToString());
         ui->labelTitle->setText(title);
 
         updateQr(info->address);
@@ -135,21 +150,19 @@ void RequestDialog::accept()
     }
 }
 
-void RequestDialog::onCopyClicked()
-{
-    if (info) {
+void RequestDialog::onCopyClicked(){
+    if(info) {
         GUIUtil::setClipboard(info->address);
         res = 2;
-        QDialog::accept();
+        accept();
     }
 }
 
-void RequestDialog::onCopyUriClicked()
-{
-    if (info) {
+void RequestDialog::onCopyUriClicked(){
+    if(info) {
         GUIUtil::setClipboard(GUIUtil::formatBitcoinURI(*info));
         res = 1;
-        QDialog::accept();
+        accept();
     }
 }
 
@@ -158,21 +171,20 @@ void RequestDialog::showEvent(QShowEvent *event)
     if (ui->lineEditAmount) ui->lineEditAmount->setFocus();
 }
 
-void RequestDialog::updateQr(const QString& str)
-{
+void RequestDialog::updateQr(QString str){
     QString uri = GUIUtil::formatBitcoinURI(*info);
     ui->labelQrImg->setText("");
     QString error;
     QPixmap pixmap = encodeToQr(uri, error);
-    if (!pixmap.isNull()) {
-        ui->labelQrImg->setPixmap(pixmap.scaled(ui->labelQrImg->width(), ui->labelQrImg->height()));
-    } else {
+    if(!pixmap.isNull()){
+        qrImage = &pixmap;
+        ui->labelQrImg->setPixmap(qrImage->scaled(ui->labelQrImg->width(), ui->labelQrImg->height()));
+    }else{
         ui->labelQrImg->setText(!error.isEmpty() ? error : "Error encoding address");
     }
 }
 
-void RequestDialog::inform(const QString& text)
-{
+void RequestDialog::inform(QString text){
     if (!snackBar)
         snackBar = new SnackBar(nullptr, this);
     snackBar->setText(text);
@@ -180,7 +192,6 @@ void RequestDialog::inform(const QString& text)
     openDialog(snackBar, this);
 }
 
-RequestDialog::~RequestDialog()
-{
+RequestDialog::~RequestDialog(){
     delete ui;
 }

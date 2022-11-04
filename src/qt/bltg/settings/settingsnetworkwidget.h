@@ -25,9 +25,6 @@ public:
 
 private:
     Ui::SettingsNetworkWidget *ui;
-
-Q_SIGNALS:
-    void saveSettings() {};
 };
 
 #endif // SETTINGSNETWORKWIDGET_H

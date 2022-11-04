@@ -10,10 +10,10 @@
 - verify that getchaintips now returns two chain tips.
 """
 
-from test_framework.test_framework import BltgTestFramework
+from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import assert_equal
 
-class GetChainTipsTest (BltgTestFramework):
+class GetChainTipsTest (BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 4
 
@@ -28,8 +28,7 @@ class GetChainTipsTest (BltgTestFramework):
         self.split_network ()
         self.nodes[0].generate(10)
         self.nodes[2].generate(20)
-        self.sync_all(self.nodes[:2])
-        self.sync_all(self.nodes[2:])
+        self.sync_all([self.nodes[:2], self.nodes[2:]])
 
         tips = self.nodes[1].getchaintips ()
         assert_equal (len (tips), 1)

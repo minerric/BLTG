@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>send</class>
  <widget class="QWidget" name="send">
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string notr="true">N/A</string>
+   <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,1">
    <property name="spacing">
@@ -66,7 +66,7 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout">
             <property name="spacing">
-             <number>0</number>
+             <number>5</number>
             </property>
             <item>
              <widget class="QLabel" name="labelTitle">
@@ -81,7 +81,7 @@
             <item>
              <widget class="QLabel" name="labelSubtitle1">
               <property name="text">
-               <string>Transfer coins publicly or privately</string>
+               <string>TextLabel</string>
               </property>
              </widget>
             </item>
@@ -103,20 +103,15 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_6">
             <property name="spacing">
-             <number>3</number>
+             <number>0</number>
             </property>
-            <item alignment="Qt::AlignHCenter">
+            <item>
              <widget class="QGroupBox" name="groupBox">
-              <property name="styleSheet">
-               <string notr="true">#groupBox{
-padding-top:2px;
-}</string>
-              </property>
               <property name="title">
                <string/>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_4">
                <property name="spacing">
@@ -152,7 +147,7 @@ padding-top:2px;
                   <enum>Qt::NoFocus</enum>
                  </property>
                  <property name="text">
-                  <string>Transparent</string>
+                  <string/>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -180,7 +175,7 @@ padding-top:2px;
                   <enum>Qt::NoFocus</enum>
                  </property>
                  <property name="text">
-                  <string>Shielded</string>
+                  <string/>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -196,19 +191,13 @@ padding-top:2px;
               </layout>
              </widget>
             </item>
-            <item alignment="Qt::AlignHCenter|Qt::AlignTop">
+            <item>
              <widget class="QLabel" name="labelSubtitle2">
-              <property name="styleSheet">
-               <string notr="true"/>
-              </property>
               <property name="text">
-               <string>Select which coins to spend</string>
+               <string>TextLabel</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-              <property name="indent">
-               <number>0</number>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -255,7 +244,7 @@ padding-top:2px;
              <string notr="true">margin-left:8px;</string>
             </property>
             <property name="text">
-             <string>Recipient address</string>
+             <string>TextLabel</string>
             </property>
            </widget>
           </item>
@@ -278,7 +267,7 @@ padding-top:2px;
           <item>
            <widget class="QLabel" name="labelSubtitleAmount">
             <property name="text">
-             <string>Amount</string>
+             <string>TextLabel</string>
             </property>
            </widget>
           </item>
@@ -377,22 +366,9 @@ padding-top:2px;
           <property name="spacing">
            <number>6</number>
           </property>
-          <property name="leftMargin">
-           <number>20</number>
-          </property>
           <property name="rightMargin">
            <number>20</number>
           </property>
-          <item>
-           <widget class="QCheckBox" name="checkBoxDelegations">
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="text">
-             <string>Include delegated</string>
-            </property>
-           </widget>
-          </item>
           <item>
            <spacer name="horizontalSpacer_4">
             <property name="orientation">
@@ -400,7 +376,7 @@ padding-top:2px;
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>10</width>
+              <width>40</width>
               <height>20</height>
              </size>
             </property>
@@ -412,7 +388,7 @@ padding-top:2px;
              <enum>Qt::NoFocus</enum>
             </property>
             <property name="text">
-             <string>Customize fee</string>
+             <string>PushButton</string>
             </property>
            </widget>
           </item>
@@ -426,7 +402,7 @@ padding-top:2px;
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>10</width>
+              <width>20</width>
               <height>20</height>
              </size>
             </property>
@@ -441,7 +417,7 @@ padding-top:2px;
              <enum>Qt::RightToLeft</enum>
             </property>
             <property name="text">
-             <string>Clear all</string>
+             <string>PushButton</string>
             </property>
            </widget>
           </item>
@@ -455,7 +431,7 @@ padding-top:2px;
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>10</width>
+              <width>20</width>
               <height>20</height>
              </size>
             </property>
@@ -467,7 +443,7 @@ padding-top:2px;
              <enum>Qt::NoFocus</enum>
             </property>
             <property name="text">
-             <string>Add recipient</string>
+             <string>PushButton</string>
             </property>
            </widget>
           </item>
@@ -571,14 +547,14 @@ padding-top:2px;
                      <item>
                       <widget class="QLabel" name="labelTitleTotalSend">
                        <property name="text">
-                        <string>Total to send</string>
+                        <string>TextLabel</string>
                        </property>
                       </widget>
                      </item>
                      <item>
                       <widget class="QLabel" name="labelAmountSend">
                        <property name="text">
-                        <string notr="true">0.00 BLTG</string>
+                        <string>TextLabel</string>
                        </property>
                       </widget>
                      </item>
@@ -643,14 +619,14 @@ padding-top:2px;
                      <item>
                       <widget class="QLabel" name="labelTitleTotalRemaining">
                        <property name="text">
-                        <string notr="true">N/A</string>
+                        <string>TextLabel</string>
                        </property>
                       </widget>
                      </item>
                      <item>
                       <widget class="QLabel" name="labelAmountRemaining">
                        <property name="text">
-                        <string notr="true">N/A</string>
+                        <string>TextLabel</string>
                        </property>
                       </widget>
                      </item>
@@ -700,7 +676,7 @@ padding-top:2px;
              <enum>Qt::NoFocus</enum>
             </property>
             <property name="text">
-             <string>Send</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -762,16 +738,6 @@ padding-top:2px;
          </widget>
         </item>
         <item>
-         <widget class="OptionButton" name="btnShieldCoins" native="true">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>50</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
          <spacer name="verticalSpacer_5">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -817,7 +783,7 @@ padding-top:2px;
              <enum>Qt::NoFocus</enum>
             </property>
             <property name="text">
-             <string>Reset to default</string>
+             <string>PushButton</string>
             </property>
            </widget>
           </item>

@@ -16,8 +16,6 @@ Unpack the files into a directory and run:
 - `bin/bltg-qt` (GUI) or
 - `bin/bltgd` (headless)
 
-If this is the first time running BLTG Core (since v3.1.1), you'll need to install the sapling params by running the included `install-params.sh` script, which copies the two params files to `$HOME/.bltg-params`
-
 ### Windows
 
 Unpack the files into a directory, and then run bltg-qt.exe.
@@ -64,8 +62,6 @@ The BLTG repo's [root README](/README.md) contains relevant information on the d
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)
 - [Files](files.md)
-- [Fuzz-testing](fuzzing.md)
-- [Reduce Memory](reduce-memory.md)
 - [Tor Support](tor.md)
 - [Init Scripts (systemd/upstart/openrc)](init.md)
 

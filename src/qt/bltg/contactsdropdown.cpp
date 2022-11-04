@@ -1,4 +1,4 @@
-// Copyright (c) 2019-2020 The PIVX developers
+// Copyright (c) 2019 The PIVX developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -14,7 +14,7 @@
 #include "addresstablemodel.h"
 
 #define DECORATION_SIZE 70
-#define NUM_ITEMS 2
+#define NUM_ITEMS 3
 
 class ContViewHolder : public FurListRow<QWidget*>
 {
@@ -48,20 +48,12 @@ public:
     ContactDropdownRow* row = nullptr;
 };
 
-ContactsDropdown::ContactsDropdown(int minWidth, int minHeight, BLTGGUI* _window, QWidget* _parent) : PWidget(_window, _parent)
+ContactsDropdown::ContactsDropdown(int minWidth, int minHeight, PWidget *parent) :
+   PWidget(parent)
 {
-    this->setStyleSheet(_window->styleSheet());
-    init(minWidth, minHeight);
-}
 
-ContactsDropdown::ContactsDropdown(int minWidth, int minHeight, PWidget* parent) : PWidget(parent)
-{
     this->setStyleSheet(parent->styleSheet());
-    init(minWidth, minHeight);
-}
 
-void ContactsDropdown::init(int minWidth, int minHeight)
-{
     delegate = new FurAbstractListItemDelegate(
                 DECORATION_SIZE,
                 new ContViewHolder(isLightTheme()),
@@ -86,15 +78,14 @@ void ContactsDropdown::init(int minWidth, int minHeight)
     list->setAttribute(Qt::WA_MacShowFocusRect, false);
     list->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    connect(list, &QListView::clicked, this, &ContactsDropdown::handleClick);
+    connect(list, SIGNAL(clicked(QModelIndex)), this, SLOT(handleClick(QModelIndex)));
 }
 
-void ContactsDropdown::setWalletModel(WalletModel* _model, const QStringList& type){
+void ContactsDropdown::setWalletModel(WalletModel* _model, const QString& type){
     if (!model) {
         model = _model->getAddressTableModel();
         this->filter = new AddressFilterProxyModel(type, this);
         this->filter->setSourceModel(model);
-        this->filter->sort(AddressTableModel::Label, Qt::AscendingOrder);
         list->setModel(this->filter);
         list->setModelColumn(AddressTableModel::Address);
     } else {
@@ -102,7 +93,7 @@ void ContactsDropdown::setWalletModel(WalletModel* _model, const QStringList& ty
     }
 }
 
-void ContactsDropdown::setType(const QStringList& type) {
+void ContactsDropdown::setType(const QString& type) {
     if (filter)
         filter->setType(type);
 }
@@ -127,7 +118,7 @@ void ContactsDropdown::handleClick(const QModelIndex &index){
     QString address = rIndex.data(Qt::DisplayRole).toString();
     QModelIndex sibling = rIndex.sibling(rIndex.row(), AddressTableModel::Label);
     QString label = sibling.data(Qt::DisplayRole).toString();
-    Q_EMIT contactSelected(address, label);
+    emit contactSelected(address, label);
     close();
 }
 

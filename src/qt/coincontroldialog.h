@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2013 The Bitcoin developers
-// Copyright (c) 2017-2020 The PIVX developers
+// Copyright (c) 2017-2019 The PIVX developers
 // Copyright (c) 2018-2022 The BLTG developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -8,9 +8,6 @@
 #define BITCOIN_QT_COINCONTROLDIALOG_H
 
 #include "amount.h"
-#include "qt/bltg/snackbar.h"
-#include "optional.h"
-#include "uint256.h"
 
 #include <QAbstractButton>
 #include <QAction>
@@ -22,19 +19,10 @@
 #include <QTreeWidgetItem>
 
 class WalletModel;
+
+class MultisigDialog;
 class CCoinControl;
 class CTxMemPool;
-
-struct TotalAmounts {
-    CAmount nPayAmount{0};      // sum of recipients send amount
-    CAmount nAmount{0};         // sum of value of selected inputs
-    CAmount nPayFee{0};         // expected tx fee
-    CAmount nAfterFee{0};       // nAmount - nPayFee
-    CAmount nChange{0};         // nAfterFee - nPayAmount
-    unsigned int nQuantity{0};  // number of selected inputs
-    unsigned int nBytes{0};     // expected tx size
-    bool fDust{false};          // true if any output is below the dust threshold
-};
 
 namespace Ui
 {
@@ -48,7 +36,7 @@ public:
     explicit CCoinControlWidgetItem(int type = Type) : QTreeWidgetItem(type) {}
     explicit CCoinControlWidgetItem(QTreeWidgetItem *parent, int type = Type) : QTreeWidgetItem(parent, type) {}
 
-    bool operator<(const QTreeWidgetItem &other) const override;
+    bool operator<(const QTreeWidgetItem &other) const;
 };
 
 class CoinControlDialog : public QDialog
@@ -56,64 +44,35 @@ class CoinControlDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit CoinControlDialog(QWidget* parent = nullptr, bool _forDelegation = false);
-    ~CoinControlDialog() override;
+    explicit CoinControlDialog(QWidget* parent = nullptr, bool fMultisigEnabled = false);
+    ~CoinControlDialog();
 
     void setModel(WalletModel* model);
-    void updateLabels();
+    void updateDialogLabels();
     void updateView();
     void refreshDialog();
-    void clearPayAmounts();
-    void addPayAmount(const CAmount& amount, bool isShieldedRecipient);
-    void setSelectionType(bool isTransparent) { fSelectTransparent = isTransparent; }
-    bool hasModel() { return model; }
 
-    CCoinControl* coinControl{nullptr};
+    // static because also called from sendcoinsdialog
+    static void updateLabels(WalletModel*, QDialog*);
+    static QString getPriorityLabel(double dPriority, double mempoolEstimatePriority);
+
+    static QList<CAmount> payAmounts;
+    static CCoinControl* coinControl;
+    static int nSplitBlockDummy;
 
 private:
-    Ui::CoinControlDialog* ui{nullptr};
-    SnackBar *snackBar{nullptr};
-    WalletModel* model{nullptr};
+    Ui::CoinControlDialog* ui;
+    WalletModel* model;
     int sortColumn;
     Qt::SortOrder sortOrder;
-    bool forDelegation;
-    int colCheckBoxWidth_treeMode{110};
-    // pair (recipient amount, ishielded recipient)
-    std::vector<std::pair<CAmount, bool>> payAmounts{};
-    unsigned int nSelectableInputs{0};
+    bool fMultisigEnabled;
 
-    // whether should show available utxo or notes.
-    bool fSelectTransparent{true};
-
-    QMenu* contextMenu{nullptr};
-    QTreeWidgetItem* contextMenuItem{nullptr};
-    QAction* copyTransactionHashAction{nullptr};
-    QAction* lockAction{nullptr};
-    QAction* unlockAction{nullptr};
-
-    void updatePushButtonSelectAll(bool checked);
+    QMenu* contextMenu;
+    QTreeWidgetItem* contextMenuItem;
+    QAction* copyTransactionHashAction;
+    QAction* lockAction;
+    QAction* unlockAction;
     void sortView(int, Qt::SortOrder);
-    void inform(const QString& text);
-
-    // Load a row with coin's data
-    void loadAvailableCoin(bool treeMode,
-                           CCoinControlWidgetItem* itemWalletAddress,
-                           QFlags<Qt::ItemFlag> flgCheckbox,
-                           QFlags<Qt::ItemFlag> flgTristate,
-                           int nDisplayUnit,
-                           const QString& sWalletAddress,
-                           const Optional<QString>& stakerAddress,
-                           const QString& sWalletLabel,
-                           const uint256& txhash,
-                           const uint32_t outIndex,
-                           const CAmount nValue,
-                           const int64_t nTime,
-                           const int nDepth,
-                           const bool isChange);
-
-    // calculate sums for selected amount, number of inputs, change, fee, after fee value, and transaction size
-    TotalAmounts getTotals() const;
-
 
     enum {
         COLUMN_CHECKBOX,
@@ -127,7 +86,7 @@ private:
     };
     friend class CCoinControlWidgetItem;
 
-private Q_SLOTS:
+private slots:
     void showMenu(const QPoint&);
     void copyAmount();
     void copyLabel();

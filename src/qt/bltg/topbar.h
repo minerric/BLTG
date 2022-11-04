@@ -1,4 +1,4 @@
-// Copyright (c) 2019-2020 The PIVX developers
+// Copyright (c) 2019 The PIVX developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -6,14 +6,11 @@
 #define TOPBAR_H
 
 #include <QWidget>
-#include "qt/askpassphrasedialog.h"
 #include "qt/bltg/pwidget.h"
 #include "qt/bltg/lockunlock.h"
 #include "amount.h"
 #include <QTimer>
 #include <QProgressBar>
-
-class BalanceBubble;
 class BLTGGUI;
 class WalletModel;
 class ClientModel;
@@ -35,36 +32,28 @@ public:
 
     void loadWalletModel() override;
     void loadClientModel() override;
-
-    void openPassPhraseDialog(AskPassphraseDialog::Mode mode, AskPassphraseDialog::Context ctx);
     void encryptWallet();
-
-    void run(int type) override;
-    void onError(QString error, int type) override;
-    void unlockWallet();
-
-public Q_SLOTS:
-    void updateBalances(const interfaces::WalletBalances& newBalance);
+public slots:
+    void updateBalances(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
+                        const CAmount& zerocoinBalance, const CAmount& unconfirmedZerocoinBalance, const CAmount& immatureZerocoinBalance,
+                        const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance,
+                        const CAmount& delegatedBalance, const CAmount& coldStakedBalance);
     void updateDisplayUnit();
 
     void setNumConnections(int count);
     void setNumBlocks(int count);
-    void setStakingStatusActive(bool fActive);
+    void updateAutoMintStatus();
     void updateStakingStatus();
-    void updateHDState(const bool upgraded, const QString& upgradeError);
-    void showUpgradeDialog(const QString& message);
 
-Q_SIGNALS:
+signals:
     void themeChanged(bool isLight);
     void walletSynced(bool isSync);
-    void tierTwoSynced(bool isSync);
     void onShowHideColdStakingChanged(bool show);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
-private Q_SLOTS:
+private slots:
     void onBtnReceiveClicked();
-    void onBtnBalanceInfoClicked();
     void onThemeClicked();
     void onBtnLockClicked();
     void lockDropdownMouseLeave();
@@ -82,12 +71,6 @@ private:
     int nDisplayUnit = -1;
     QTimer* timerStakingIcon = nullptr;
     bool isInitializing = true;
-
-    // info popup
-    BalanceBubble* balanceBubble = nullptr;
-
-    void updateTorIcon();
-    void connectUpgradeBtnAndDialogTimer(const QString& message);
 };
 
 #endif // TOPBAR_H

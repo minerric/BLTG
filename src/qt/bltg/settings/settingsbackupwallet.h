@@ -1,4 +1,4 @@
-// Copyright (c) 2019-2020 The PIVX developers
+// Copyright (c) 2019 The PIVX developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -20,12 +20,14 @@ public:
     explicit SettingsBackupWallet(BLTGGUI* _window, QWidget *parent = nullptr);
     ~SettingsBackupWallet();
 
-private Q_SLOTS:
+private slots:
+    void backupWallet();
     void selectFileOutput();
     void changePassphrase();
 
 private:
     Ui::SettingsBackupWallet *ui;
+    QString filename;
 };
 
 #endif // SETTINGSBACKUPWALLET_H

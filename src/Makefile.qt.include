@@ -6,27 +6,65 @@ bin_PROGRAMS += qt/bltg-qt
 EXTRA_LIBRARIES += qt/libbitcoinqt.a
 
 # bltg qt core #
-include Makefile.qt_locale.include
+QT_TS = \
+  qt/locale/bltg_bg.ts \
+  qt/locale/bltg_ca.ts \
+  qt/locale/bltg_cs.ts \
+  qt/locale/bltg_da.ts \
+  qt/locale/bltg_de.ts \
+  qt/locale/bltg_en.ts \
+  qt/locale/bltg_en_GB.ts \
+  qt/locale/bltg_en_US.ts \
+  qt/locale/bltg_eo.ts \
+  qt/locale/bltg_es.ts \
+  qt/locale/bltg_es_ES.ts \
+  qt/locale/bltg_fi.ts \
+  qt/locale/bltg_fr_FR.ts \
+  qt/locale/bltg_hi_IN.ts \
+  qt/locale/bltg_hr.ts \
+  qt/locale/bltg_hr_HR.ts \
+  qt/locale/bltg_it.ts \
+  qt/locale/bltg_ja.ts \
+  qt/locale/bltg_ko_KR.ts \
+  qt/locale/bltg_lt_LT.ts \
+  qt/locale/bltg_nl.ts \
+  qt/locale/bltg_pl.ts \
+  qt/locale/bltg_pt.ts \
+  qt/locale/bltg_pt_BR.ts \
+  qt/locale/bltg_ro_RO.ts \
+  qt/locale/bltg_ru.ts \
+  qt/locale/bltg_sk.ts \
+  qt/locale/bltg_sv.ts \
+  qt/locale/bltg_tr.ts \
+  qt/locale/bltg_uk.ts \
+  qt/locale/bltg_vi.ts \
+  qt/locale/bltg_zh_CN.ts \
+  qt/locale/bltg_zh_TW.ts
 
 QT_FORMS_UI = \
   qt/forms/addressbookpage.ui \
   qt/forms/askpassphrasedialog.ui \
   qt/forms/coincontroldialog.ui \
+  qt/forms/blockexplorer.ui \
   qt/forms/editaddressdialog.ui \
+  qt/forms/governancepage.ui \
   qt/forms/helpmessagedialog.ui \
   qt/forms/intro.ui \
   qt/forms/openuridialog.ui \
+  qt/forms/optionsdialog.ui \
   qt/forms/rpcconsole.ui \
   qt/bltg/forms/loadingdialog.ui \
+  qt/forms/zbltgcontroldialog.ui \
   qt/bltg/forms/snackbar.ui \
   qt/bltg/forms/navmenuwidget.ui \
   qt/bltg/forms/lockunlock.ui \
   qt/bltg/forms/expandablebutton.ui \
   qt/bltg/forms/receivedialog.ui \
-  qt/bltg/forms/balancebubble.ui \
+  qt/bltg/forms/walletpassworddialog.ui \
   qt/bltg/forms/topbar.ui \
   qt/bltg/forms/txrow.ui \
   qt/bltg/forms/dashboardwidget.ui \
+  qt/bltg/forms/coincontrolbltgwidget.ui \
   qt/bltg/forms/addresslabelrow.ui \
   qt/bltg/forms/contactdropdownrow.ui \
   qt/bltg/forms/mninfodialog.ui \
@@ -36,10 +74,10 @@ QT_FORMS_UI = \
   qt/bltg/forms/masternodeswidget.ui \
   qt/bltg/forms/myaddressrow.ui \
   qt/bltg/forms/csrow.ui \
-  qt/bltg/forms/sendmemodialog.ui \
   qt/bltg/forms/sendchangeaddressdialog.ui \
   qt/bltg/forms/sendconfirmdialog.ui \
   qt/bltg/forms/sendcustomfeedialog.ui \
+  qt/bltg/forms/sendchangeaddressdialog.ui \
   qt/bltg/forms/sendmultirow.ui \
   qt/bltg/forms/send.ui \
   qt/bltg/forms/addnewaddressdialog.ui \
@@ -49,21 +87,18 @@ QT_FORMS_UI = \
   qt/bltg/forms/tooltipmenu.ui \
   qt/bltg/forms/addresseswidget.ui \
   qt/bltg/forms/defaultdialog.ui \
+  qt/bltg/forms/denomgenerationdialog.ui \
+  qt/bltg/forms/privacywidget.ui \
   qt/bltg/forms/coldstakingwidget.ui \
-  qt/bltg/forms/proposalcard.ui \
-  qt/bltg/forms/mnselectiondialog.ui \
-  qt/bltg/forms/votedialog.ui \
-  qt/bltg/forms/createproposaldialog.ui \
-  qt/bltg/forms/proposalinfodialog.ui \
-  qt/bltg/forms/governancewidget.ui \
   qt/bltg/settings/forms/settingsbackupwallet.ui \
-  qt/bltg/settings/forms/settingsexportcsv.ui \
   qt/bltg/settings/forms/settingsbittoolwidget.ui \
   qt/bltg/settings/forms/settingsconsolewidget.ui \
   qt/bltg/settings/forms/settingsdisplayoptionswidget.ui \
   qt/bltg/settings/forms/settingsfaqwidget.ui \
   qt/bltg/settings/forms/settingsinformationwidget.ui \
   qt/bltg/settings/forms/settingsmainoptionswidget.ui \
+  qt/bltg/settings/forms/settingsmultisenddialog.ui \
+  qt/bltg/settings/forms/settingsmultisendwidget.ui \
   qt/bltg/settings/forms/settingssignmessagewidgets.ui \
   qt/bltg/settings/forms/settingswalletoptionswidget.ui \
   qt/bltg/settings/forms/settingswalletrepairwidget.ui \
@@ -77,45 +112,53 @@ QT_MOC_CPP = \
   qt/moc_askpassphrasedialog.cpp \
   qt/moc_bantablemodel.cpp \
   qt/moc_bitcoinaddressvalidator.cpp \
+  qt/moc_bitcoinamountfield.cpp \
   qt/bltg/moc_bltggui.cpp \
   qt/moc_bitcoinunits.cpp \
+  qt/moc_blockexplorer.cpp \
   qt/moc_clientmodel.cpp \
   qt/moc_coincontroldialog.cpp \
   qt/moc_coincontroltreewidget.cpp \
   qt/moc_csvmodelwriter.cpp \
   qt/moc_editaddressdialog.cpp \
+  qt/moc_governancepage.cpp \
   qt/moc_guiutil.cpp \
   qt/moc_intro.cpp \
   qt/moc_macdockiconhandler.cpp \
   qt/moc_macnotificationhandler.cpp \
   qt/moc_notificator.cpp \
   qt/moc_openuridialog.cpp \
+  qt/moc_optionsdialog.cpp \
   qt/moc_optionsmodel.cpp \
   qt/moc_peertablemodel.cpp \
   qt/moc_paymentserver.cpp \
   qt/moc_qvalidatedlineedit.cpp \
   qt/moc_qvaluecombobox.cpp \
+  qt/moc_proposalframe.cpp \
   qt/moc_recentrequeststablemodel.cpp \
   qt/moc_rpcconsole.cpp \
-  qt/moc_rpcexecutor.cpp \
+  qt/moc_splashscreen.cpp \
   qt/moc_trafficgraphwidget.cpp \
+  qt/moc_transactiondesc.cpp \
   qt/moc_transactionfilterproxy.cpp \
   qt/moc_transactiontablemodel.cpp \
   qt/moc_utilitydialog.cpp \
   qt/moc_walletmodel.cpp \
   qt/bltg/moc_loadingdialog.cpp \
+  qt/moc_zbltgcontroldialog.cpp \
   qt/bltg/moc_pwidget.cpp \
-  qt/bltg/moc_focuseddialog.cpp \
   qt/bltg/moc_snackbar.cpp \
   qt/bltg/moc_navmenuwidget.cpp \
   qt/bltg/moc_lockunlock.cpp \
   qt/bltg/moc_expandablebutton.cpp \
   qt/bltg/moc_furabstractlistitemdelegate.cpp \
   qt/bltg/moc_receivedialog.cpp \
+  qt/bltg/moc_walletpassworddialog.cpp \
   qt/bltg/moc_pfborderimage.cpp \
   qt/bltg/moc_topbar.cpp \
   qt/bltg/moc_txrow.cpp \
   qt/bltg/moc_dashboardwidget.cpp \
+  qt/bltg/moc_coincontrolbltgwidget.cpp \
   qt/bltg/moc_addresslabelrow.cpp \
   qt/bltg/moc_contactdropdownrow.cpp \
   qt/bltg/moc_mninfodialog.cpp \
@@ -131,7 +174,7 @@ QT_MOC_CPP = \
   qt/bltg/moc_sendchangeaddressdialog.cpp \
   qt/bltg/moc_sendconfirmdialog.cpp \
   qt/bltg/moc_sendcustomfeedialog.cpp \
-  qt/bltg/moc_sendmemodialog.cpp \
+  qt/bltg/moc_sendchangeaddressdialog.cpp \
   qt/bltg/moc_sendmultirow.cpp \
   qt/bltg/moc_send.cpp \
   qt/bltg/moc_addnewaddressdialog.cpp \
@@ -141,21 +184,18 @@ QT_MOC_CPP = \
   qt/bltg/moc_tooltipmenu.cpp \
   qt/bltg/moc_addresseswidget.cpp \
   qt/bltg/moc_defaultdialog.cpp \
+  qt/bltg/moc_denomgenerationdialog.cpp \
+  qt/bltg/moc_privacywidget.cpp \
   qt/bltg/moc_coldstakingwidget.cpp \
-  qt/bltg/moc_proposalcard.cpp \
-  qt/bltg/moc_mnselectiondialog.cpp \
-  qt/bltg/moc_votedialog.cpp \
-  qt/bltg/moc_createproposaldialog.cpp \
-  qt/bltg/moc_proposalinfodialog.cpp \
-  qt/bltg/moc_governancewidget.cpp \
   qt/bltg/settings/moc_settingsbackupwallet.cpp \
-  qt/bltg/settings/moc_settingsexportcsv.cpp \
   qt/bltg/settings/moc_settingsbittoolwidget.cpp \
   qt/bltg/settings/moc_settingsconsolewidget.cpp \
   qt/bltg/settings/moc_settingsdisplayoptionswidget.cpp \
   qt/bltg/settings/moc_settingsfaqwidget.cpp \
   qt/bltg/settings/moc_settingsinformationwidget.cpp \
   qt/bltg/settings/moc_settingsmainoptionswidget.cpp \
+  qt/bltg/settings/moc_settingsmultisenddialog.cpp \
+  qt/bltg/settings/moc_settingsmultisendwidget.cpp \
   qt/bltg/settings/moc_settingssignmessagewidgets.cpp \
   qt/bltg/settings/moc_settingswalletoptionswidget.cpp \
   qt/bltg/settings/moc_settingswalletrepairwidget.cpp \
@@ -169,12 +209,19 @@ BITCOIN_MM = \
 
 QT_MOC = \
   qt/bltg.moc \
-  qt/intro.moc
+  qt/bitcoinamountfield.moc \
+  qt/intro.moc \
+  qt/rpcconsole.moc \
+  qt/bltg/settings/moc_settingsconsolewidget.cpp
 
 QT_QRC_CPP = qt/qrc_bltg.cpp
 QT_QRC = qt/bltg.qrc
 QT_QRC_LOCALE_CPP = qt/qrc_bltg_locale.cpp
 QT_QRC_LOCALE = qt/bltg_locale.qrc
+
+PROTOBUF_CC = qt/paymentrequest.pb.cc
+PROTOBUF_H = qt/paymentrequest.pb.h
+PROTOBUF_PROTO = qt/paymentrequest.proto
 
 BITCOIN_QT_H = \
   qt/addressbookpage.h \
@@ -182,13 +229,16 @@ BITCOIN_QT_H = \
   qt/askpassphrasedialog.h \
   qt/bantablemodel.h \
   qt/bitcoinaddressvalidator.h \
+  qt/bitcoinamountfield.h \
   qt/bltg/bltggui.h \
   qt/bitcoinunits.h \
+  qt/blockexplorer.h \
   qt/clientmodel.h \
   qt/coincontroldialog.h \
   qt/coincontroltreewidget.h \
   qt/csvmodelwriter.h \
   qt/editaddressdialog.h \
+  qt/governancepage.h \
   qt/guiconstants.h \
   qt/guiutil.h \
   qt/intro.h \
@@ -197,16 +247,20 @@ BITCOIN_QT_H = \
   qt/networkstyle.h \
   qt/notificator.h \
   qt/openuridialog.h \
+  qt/optionsdialog.h \
   qt/optionsmodel.h \
+  qt/paymentrequestplus.h \
   qt/paymentserver.h \
   qt/peertablemodel.h \
   qt/platformstyle.h \
+  qt/proposalframe.h \
   qt/qvalidatedlineedit.h \
   qt/qvaluecombobox.h \
   qt/recentrequeststablemodel.h \
   qt/rpcconsole.h \
-  qt/rpcexecutor.h \
+  qt/splashscreen.h \
   qt/trafficgraphwidget.h \
+  qt/transactiondesc.h \
   qt/transactionfilterproxy.h \
   qt/transactionrecord.h \
   qt/transactiontablemodel.h \
@@ -217,8 +271,8 @@ BITCOIN_QT_H = \
   qt/bltg/pfborderimage.h \
   qt/bltg/loadingdialog.h \
   qt/winshutdownmonitor.h \
+  qt/zbltgcontroldialog.h \
   qt/bltg/pwidget.h \
-  qt/bltg/focuseddialog.h \
   qt/bltg/guitransactionsutils.h \
   qt/bltg/snackbar.h \
   qt/bltg/navmenuwidget.h \
@@ -229,12 +283,13 @@ BITCOIN_QT_H = \
   qt/bltg/txviewholder.h \
   qt/bltg/qtutils.h \
   qt/bltg/expandablebutton.h \
-  qt/bltg/balancebubble.h \
+  qt/bltg/walletpassworddialog.h \
   qt/bltg/topbar.h \
   qt/bltg/txrow.h \
   qt/bltg/addressholder.h \
   qt/bltg/addressfilterproxymodel.h \
   qt/bltg/dashboardwidget.h \
+  qt/bltg/coincontrolbltgwidget.h \
   qt/bltg/addresslabelrow.h \
   qt/bltg/contactdropdownrow.h \
   qt/bltg/mninfodialog.h \
@@ -250,7 +305,7 @@ BITCOIN_QT_H = \
   qt/bltg/sendchangeaddressdialog.h \
   qt/bltg/sendconfirmdialog.h \
   qt/bltg/sendcustomfeedialog.h \
-  qt/bltg/sendmemodialog.h \
+  qt/bltg/sendchangeaddressdialog.h \
   qt/bltg/sendmultirow.h \
   qt/bltg/send.h \
   qt/bltg/addnewaddressdialog.h \
@@ -260,22 +315,18 @@ BITCOIN_QT_H = \
   qt/bltg/tooltipmenu.h \
   qt/bltg/addresseswidget.h \
   qt/bltg/defaultdialog.h \
+  qt/bltg/denomgenerationdialog.h \
+  qt/bltg/privacywidget.h \
   qt/bltg/coldstakingwidget.h \
-  qt/bltg/governancemodel.h \
-  qt/bltg/proposalcard.h \
-  qt/bltg/mnselectiondialog.h \
-  qt/bltg/votedialog.h \
-  qt/bltg/createproposaldialog.h \
-  qt/bltg/proposalinfodialog.h \
-  qt/bltg/governancewidget.h \
   qt/bltg/settings/settingsbackupwallet.h \
-  qt/bltg/settings/settingsexportcsv.h \
   qt/bltg/settings/settingsbittoolwidget.h \
   qt/bltg/settings/settingsconsolewidget.h \
   qt/bltg/settings/settingsdisplayoptionswidget.h \
   qt/bltg/settings/settingsfaqwidget.h \
   qt/bltg/settings/settingsinformationwidget.h \
   qt/bltg/settings/settingsmainoptionswidget.h \
+  qt/bltg/settings/settingsmultisenddialog.h \
+  qt/bltg/settings/settingsmultisendwidget.h \
   qt/bltg/settings/settingssignmessagewidgets.h \
   qt/bltg/settings/settingswalletoptionswidget.h \
   qt/bltg/settings/settingswalletrepairwidget.h \
@@ -284,18 +335,78 @@ BITCOIN_QT_H = \
   qt/bltg/splash.h
 
 RES_ICONS = \
+  qt/res/icons/add.png \
+  qt/res/icons/address-book.png \
+  qt/res/icons/automint_active.png \
+  qt/res/icons/automint_inactive.png \
   qt/res/icons/bitcoin.ico \
   qt/res/icons/bitcoin.png \
   qt/res/icons/bitcoin_testnet.ico \
   qt/res/icons/bitcoin_testnet.png \
   qt/res/icons/bitcoin_regtest.png \
+  qt/res/icons/browse.png \
+  qt/res/icons/clock1.png \
+  qt/res/icons/clock2.png \
+  qt/res/icons/clock3.png \
+  qt/res/icons/clock4.png \
+  qt/res/icons/clock5.png \
+  qt/res/icons/configure.png \
+  qt/res/icons/connect0_16.png \
+  qt/res/icons/connect1_16.png \
+  qt/res/icons/connect2_16.png \
+  qt/res/icons/connect3_16.png \
+  qt/res/icons/connect4_16.png \
+  qt/res/icons/debugwindow.png \
+  qt/res/icons/edit.png \
+  qt/res/icons/editcopy.png \
+  qt/res/icons/editpaste.png \
+  qt/res/icons/explorer.png \
+  qt/res/icons/export.png \
+  qt/res/icons/eye.png \
+  qt/res/icons/eye_minus.png \
+  qt/res/icons/eye_plus.png \
+  qt/res/icons/filesave.png \
+  qt/res/icons/history.png \
+  qt/res/icons/key.png \
   qt/res/icons/lock_closed.png \
   qt/res/icons/lock_open.png \
+  qt/res/icons/masternodes.png \
+  qt/res/icons/onion.png \
   qt/res/icons/overview.png \
+  qt/res/icons/qrcode.png \
+  qt/res/icons/quit.png \
+  qt/res/icons/receive.png \
+  qt/res/icons/receive_dark.png \
+  qt/res/icons/privacy.png \
+  qt/res/icons/remove.png \
+  qt/res/icons/send.png \
+  qt/res/icons/send_dark.png \
+  qt/res/icons/governance.png \
+  qt/res/icons/governance_dark.png \
+  qt/res/icons/staking_active.png \
+  qt/res/icons/staking_inactive.png \
+  qt/res/icons/synced.png \
+  qt/res/icons/trade.png \
+  qt/res/icons/transaction0.png \
+  qt/res/icons/transaction2.png \
+  qt/res/icons/transaction_conflicted.png \
+  qt/res/icons/tx_inout.png \
+  qt/res/icons/tx_input.png \
+  qt/res/icons/tx_output.png \
+  qt/res/icons/tx_mined.png \
   qt/res/icons/ic-transaction-received.svg \
   qt/res/icons/ic-transaction-mint.svg \
   qt/res/icons/ic-transaction-sent.svg \
   qt/res/icons/ic-transaction-staked.svg \
+  qt/res/icons/unit_bltg.png \
+  qt/res/icons/unit_mbltg.png \
+  qt/res/icons/unit_ubltg.png \
+  qt/res/icons/unit_tbltg.png \
+  qt/res/icons/unit_tmbltg.png \
+  qt/res/icons/unit_tubltg.png \
+  qt/res/icons/yesvote.png \
+  qt/res/icons/novote.png \
+  qt/res/icons/abstainvote.png \
   qt/bltg/res/img/bg-dashboard-banner.png \
   qt/bltg/res/img/bg-multi-number-dark.svg \
   qt/bltg/res/img/ic-check-locked.svg \
@@ -307,7 +418,7 @@ RES_ICONS = \
   qt/bltg/res/img/ic-nav-cold-staking-active.svg \
   qt/bltg/res/img/ic-nav-dashboard-active.svg \
   qt/bltg/res/img/ic-wallet-status-locked.svg \
-  qt/bltg/res/img/bg-splash.svg \
+  qt/bltg/res/img/bg-splash.png \
   qt/bltg/res/img/bg-splash.png \
   qt/bltg/res/img/ic-check-mint.svg \
   qt/bltg/res/img/ic-nav-dashboard-hover.svg \
@@ -327,7 +438,7 @@ RES_ICONS = \
   qt/bltg/res/img/ic-nav-master-hover.svg \
   qt/bltg/res/img/ic-watch-password.svg \
   qt/bltg/res/img/bg-welcome.jpg \
-  qt/bltg/res/img/bg-welcome.svg \
+  qt/bltg/res/img/bg-welcome.png \
   qt/bltg/res/img/bg-welcome@2x.jpg \
   qt/bltg/res/img/bg-welcome@3x.jpg \
   qt/bltg/res/img/bg-welcome.png \
@@ -372,7 +483,6 @@ RES_ICONS = \
   qt/bltg/res/img/img-empty-dark-transactions.svg \
   qt/bltg/res/img/ic-address-book-white.svg \
   qt/bltg/res/img/ic-chevron-right.svg \
-  qt/bltg/res/img/ic-chevron-right-liliac.svg \
   qt/bltg/res/img/ic-nav-send.svg \
   qt/bltg/res/img/img-empty-error.svg \
   qt/bltg/res/img/ic-address-book.svg \
@@ -429,7 +539,7 @@ RES_ICONS = \
   qt/bltg/res/img/ic-arrow-white-left.svg \
   qt/bltg/res/img/ic-exit.svg \
   qt/bltg/res/img/ic-switch-liliac-on.svg \
-  qt/bltg/res/img/img-nav-logo.svg \
+  qt/bltg/res/img/img-nav-logo.png \
   qt/bltg/res/img/ic-arrow-white-right.svg \
   qt/bltg/res/img/ic-expand.svg \
   qt/bltg/res/img/ic-switch-off.svg \
@@ -439,7 +549,6 @@ RES_ICONS = \
   qt/bltg/res/img/ic-switch-on.svg \
   qt/bltg/res/img/img-qr-test.png \
   qt/bltg/res/img/ic-check-box.svg \
-  qt/bltg/res/img/ic-check-box-light.svg \
   qt/bltg/res/img/ic-check-box-dark-active.svg \
   qt/bltg/res/img/ic-check-box-indeterminate.svg \
   qt/bltg/res/img/ic-check-box-liliac-indeterminate.svg \
@@ -454,8 +563,6 @@ RES_ICONS = \
   qt/bltg/res/img/dark/ic-transaction-cs-contract-inactive.svg \
   qt/bltg/res/img/img-qr.svg \
   qt/bltg/res/img/ic-check-connect-off.svg \
-  qt/bltg/res/img/ic-check-tor-off.svg \
-  qt/bltg/res/img/ic-check-tor.svg \
   qt/bltg/res/img/ic-label.svg \
   qt/bltg/res/img/ic-transaction-received.svg \
   qt/bltg/res/img/dark/ic-transaction-received.svg \
@@ -501,43 +608,32 @@ RES_ICONS = \
   qt/bltg/res/img/ic-transaction-cs-contract.svg \
   qt/bltg/res/img/ic-transaction-cs-contract-inactive.svg \
   qt/bltg/res/img/ic-check-box-indeterminate.svg \
-  qt/bltg/res/img/ic-information.svg \
-  qt/bltg/res/img/ic-information-hover.svg \
   qt/bltg/res/img/ani-loading-dark.gif \
-  qt/bltg/res/img/ani-loading.gif \
-  qt/bltg/res/img/ic-check-vote.svg \
-  qt/bltg/res/img/ic-check-vote-active.svg \
-  qt/bltg/res/img/ic-check-vote-dark.svg \
-  qt/bltg/res/img/ic-check-vote-active-dark.svg \
-  qt/bltg/res/img/ic-check-block.svg \
-  qt/bltg/res/img/ic-filter.svg \
-  qt/bltg/res/img/ic-link.svg \
-  qt/bltg/res/img/ic-nav-governance.svg \
-  qt/bltg/res/img/ic-nav-governance-active.svg \
-  qt/bltg/res/img/ic-nav-governance-hover.svg \
-  qt/bltg/res/img/ic-time.svg \
-  qt/bltg/res/img/ic-link-hover.svg \
-  qt/bltg/res/img/img-empty-governance.svg \
-  qt/bltg/res/img/img-empty-dark-governance.svg
+  qt/bltg/res/img/ani-loading.gif
+
+
 
 BITCOIN_QT_BASE_CPP = \
   qt/bantablemodel.cpp \
   qt/bitcoinaddressvalidator.cpp \
+  qt/bitcoinamountfield.cpp \
   qt/bltg/bltggui.cpp \
   qt/bitcoinunits.cpp \
+  qt/blockexplorer.cpp \
   qt/clientmodel.cpp \
   qt/csvmodelwriter.cpp \
   qt/guiutil.cpp \
   qt/intro.cpp \
   qt/networkstyle.cpp \
   qt/notificator.cpp \
+  qt/optionsdialog.cpp \
   qt/optionsmodel.cpp \
   qt/peertablemodel.cpp \
   qt/platformstyle.cpp \
   qt/qvalidatedlineedit.cpp \
   qt/qvaluecombobox.cpp \
   qt/rpcconsole.cpp \
-  qt/rpcexecutor.cpp \
+  qt/splashscreen.cpp \
   qt/trafficgraphwidget.cpp \
   qt/utilitydialog.cpp
 
@@ -547,20 +643,25 @@ BITCOIN_QT_WALLET_CPP = \
   qt/addressbookpage.cpp \
   qt/addresstablemodel.cpp \
   qt/askpassphrasedialog.cpp \
+  qt/blockexplorer.cpp \
   qt/coincontroldialog.cpp \
   qt/coincontroltreewidget.cpp \
   qt/editaddressdialog.cpp \
+  qt/governancepage.cpp \
   qt/openuridialog.cpp \
+  qt/paymentrequestplus.cpp \
   qt/paymentserver.cpp \
+  qt/proposalframe.cpp \
   qt/recentrequeststablemodel.cpp \
+  qt/transactiondesc.cpp \
   qt/transactionfilterproxy.cpp \
   qt/transactionrecord.cpp \
   qt/transactiontablemodel.cpp \
   qt/walletmodel.cpp \
   qt/walletmodeltransaction.cpp \
   qt/bltg/loadingdialog.cpp \
+  qt/zbltgcontroldialog.cpp \
   qt/bltg/pwidget.cpp \
-  qt/bltg/focuseddialog.cpp \
   qt/bltg/guitransactionsutils.cpp \
   qt/bltg/snackbar.cpp \
   qt/bltg/navmenuwidget.cpp \
@@ -570,12 +671,13 @@ BITCOIN_QT_WALLET_CPP = \
   qt/bltg/txviewholder.cpp \
   qt/bltg/qtutils.cpp \
   qt/bltg/expandablebutton.cpp \
-  qt/bltg/balancebubble.cpp \
+  qt/bltg/walletpassworddialog.cpp \
   qt/bltg/topbar.cpp \
   qt/bltg/txrow.cpp \
   qt/bltg/addressholder.cpp \
   qt/bltg/addressfilterproxymodel.cpp \
   qt/bltg/dashboardwidget.cpp \
+  qt/bltg/coincontrolbltgwidget.cpp \
   qt/bltg/addresslabelrow.cpp \
   qt/bltg/contactdropdownrow.cpp \
   qt/bltg/contactsdropdown.cpp \
@@ -591,7 +693,7 @@ BITCOIN_QT_WALLET_CPP = \
   qt/bltg/sendchangeaddressdialog.cpp \
   qt/bltg/sendconfirmdialog.cpp \
   qt/bltg/sendcustomfeedialog.cpp \
-  qt/bltg/sendmemodialog.cpp \
+  qt/bltg/sendchangeaddressdialog.cpp \
   qt/bltg/sendmultirow.cpp \
   qt/bltg/send.cpp \
   qt/bltg/addnewaddressdialog.cpp \
@@ -601,22 +703,18 @@ BITCOIN_QT_WALLET_CPP = \
   qt/bltg/tooltipmenu.cpp \
   qt/bltg/addresseswidget.cpp \
   qt/bltg/defaultdialog.cpp \
+  qt/bltg/denomgenerationdialog.cpp \
+  qt/bltg/privacywidget.cpp \
   qt/bltg/coldstakingwidget.cpp \
-  qt/bltg/governancemodel.cpp \
-  qt/bltg/proposalcard.cpp \
-  qt/bltg/mnselectiondialog.cpp \
-  qt/bltg/votedialog.cpp \
-  qt/bltg/createproposaldialog.cpp \
-  qt/bltg/proposalinfodialog.cpp \
-  qt/bltg/governancewidget.cpp \
   qt/bltg/settings/settingsbackupwallet.cpp \
-  qt/bltg/settings/settingsexportcsv.cpp \
   qt/bltg/settings/settingsbittoolwidget.cpp \
   qt/bltg/settings/settingsconsolewidget.cpp \
   qt/bltg/settings/settingsdisplayoptionswidget.cpp \
   qt/bltg/settings/settingsfaqwidget.cpp \
   qt/bltg/settings/settingsinformationwidget.cpp \
   qt/bltg/settings/settingsmainoptionswidget.cpp \
+  qt/bltg/settings/settingsmultisenddialog.cpp \
+  qt/bltg/settings/settingsmultisendwidget.cpp \
   qt/bltg/settings/settingssignmessagewidgets.cpp \
   qt/bltg/settings/settingswalletoptionswidget.cpp \
   qt/bltg/settings/settingswalletrepairwidget.cpp \
@@ -637,27 +735,39 @@ RES_IMAGES = \
   qt/res/images/about.png \
   qt/res/images/splash.png \
   qt/res/images/splash_testnet.png \
-  qt/res/images/splash_regtest.png
+  qt/res/images/splash_regtest.png \
+  qt/res/images/bltg_logo_horizontal.png \
+  qt/res/images/downArrow_dark.png \
+  qt/res/images/downArrow_small_dark.png \
+  qt/res/images/downArrow_small.png \
+  qt/res/images/upArrow_small_dark.png \
+  qt/res/images/upArrow_small.png \
+  qt/res/images/leftArrow_small_dark.png \
+  qt/res/images/rightArrow_small_dark.png \
+  qt/res/images/qtreeview_selected.png
 
 RES_CSS = \
   qt/res/css/default.css \
   qt/bltg/res/css/style_dark.css \
   qt/bltg/res/css/style_light.css
 
+RES_MOVIES = $(wildcard $(srcdir)/qt/res/movies/spinner-*.png)
+
 BITCOIN_RC = qt/res/bltg-qt-res.rc
 
 BITCOIN_QT_INCLUDES = -I$(builddir)/qt -I$(srcdir)/qt -I$(srcdir)/qt/forms \
-  -I$(builddir)/qt/forms -DQT_NO_KEYWORDS
+  -I$(builddir)/qt/forms
 
 qt_libbitcoinqt_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
-  $(QT_INCLUDES) $(QT_DBUS_INCLUDES) $(QR_CFLAGS) $(SVG_CFLAGS) $(CHARTS_CFLAGS)
+  $(QT_INCLUDES) $(QT_DBUS_INCLUDES) $(PROTOBUF_CFLAGS) $(QR_CFLAGS) $(SVG_CFLAGS) $(CHARTS_CFLAGS)
 qt_libbitcoinqt_a_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
 qt_libbitcoinqt_a_OBJCXXFLAGS = $(AM_OBJCXXFLAGS) $(QT_PIE_FLAGS)
 
 qt_libbitcoinqt_a_SOURCES = $(BITCOIN_QT_CPP) $(BITCOIN_QT_H) $(QT_FORMS_UI) \
-  $(QT_QRC) $(QT_QRC_LOCALE) $(QT_TS) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS)
+  $(QT_QRC) $(QT_QRC_LOCALE) $(QT_TS) $(PROTOBUF_PROTO) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS) $(RES_MOVIES)
 
-nodist_qt_libbitcoinqt_a_SOURCES = $(QT_MOC_CPP) $(QT_MOC) $(QT_QRC_CPP) $(QT_QRC_LOCALE_CPP)
+nodist_qt_libbitcoinqt_a_SOURCES = $(QT_MOC_CPP) $(QT_MOC) $(PROTOBUF_CC) \
+  $(PROTOBUF_H) $(QT_QRC_CPP) $(QT_QRC_LOCALE_CPP)
 
 # forms/foo.h -> forms/ui_foo.h
 QT_FORMS_H=$(join $(dir $(QT_FORMS_UI)),$(addprefix ui_, $(notdir $(QT_FORMS_UI:.ui=.h))))
@@ -667,9 +777,14 @@ QT_FORMS_H=$(join $(dir $(QT_FORMS_UI)),$(addprefix ui_, $(notdir $(QT_FORMS_UI:
 $(QT_MOC): $(QT_FORMS_H)
 $(qt_libbitcoinqt_a_OBJECTS) $(qt_bltg_qt_OBJECTS) : | $(QT_MOC)
 
+#Generating these with a half-written protobuf header leads to wacky results.
+#This makes sure it's done.
+$(QT_MOC): $(PROTOBUF_H)
+$(QT_MOC_CPP): $(PROTOBUF_H)
+
 # bltg-qt binary #
 qt_bltg_qt_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
-  $(QT_INCLUDES) $(QR_CFLAGS) $(SVG_CFLAGS) $(CHARTS_CFLAGS)
+  $(QT_INCLUDES) $(PROTOBUF_CFLAGS) $(QR_CFLAGS) $(SVG_CFLAGS) $(CHARTS_CFLAGS)
 qt_bltg_qt_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
 
 qt_bltg_qt_SOURCES = qt/bltg.cpp
@@ -686,9 +801,9 @@ endif
 if ENABLE_ZMQ
 qt_bltg_qt_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
 endif
-qt_bltg_qt_LDADD += $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) $(LIBBITCOIN_ZEROCOIN) $(LIBSAPLING) $(LIBRUSTZCASH) $(LIBZCASH_LIBS) $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) \
-  $(BOOST_LIBS) $(QT_LIBS) $(QT_DBUS_LIBS) $(QR_LIBS) $(SVG_LIBS) $(CHARTS_LIBS) $(BDB_LIBS) $(MINIUPNPC_LIBS) $(NATPMP_LIBS) $(LIBSECP256K1) \
-  $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(BLS_LIBS)
+qt_bltg_qt_LDADD += $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) $(LIBBITCOIN_ZEROCOIN) $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) \
+  $(BOOST_LIBS) $(QT_LIBS) $(QT_DBUS_LIBS) $(QR_LIBS) $(PROTOBUF_LIBS) $(SVG_LIBS) $(CHARTS_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(LIBSECP256K1) \
+  $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
 qt_bltg_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 qt_bltg_qt_LIBTOOLFLAGS = $(AM_LIBTOOLFLAGS) --tag CXX
 
@@ -699,7 +814,7 @@ SECONDARY: $(QT_QM)
 
 $(srcdir)/qt/bltgstrings.cpp: $(libbitcoin_server_a_SOURCES) $(libbitcoin_wallet_a_SOURCES) $(libbitcoin_common_a_SOURCES) $(libbitcoin_zmq_a_SOURCES) $(libbitcoin_util_a_SOURCES)
 	@test -n $(XGETTEXT) || echo "xgettext is required for updating translations"
-	$(AM_V_GEN) cd $(srcdir); XGETTEXT=$(XGETTEXT) $(PYTHON) ../share/qt/extract_strings_qt.py $^
+	$(AM_V_GEN) cd $(srcdir); XGETTEXT=$(XGETTEXT) PACKAGE_NAME="$(PACKAGE_NAME)" $(PYTHON) ../share/qt/extract_strings_qt.py $^
 
 translate: $(srcdir)/qt/bltgstrings.cpp $(QT_FORMS_UI) $(QT_FORMS_UI) $(BITCOIN_QT_BASE_CPP) qt/bltg.cpp $(BITCOIN_QT_WINDOWS_CPP) $(BITCOIN_QT_WALLET_CPP) $(BITCOIN_QT_H) $(BITCOIN_MM)
 	@test -n $(LUPDATE) || echo "lupdate is required for updating translations"
@@ -712,12 +827,12 @@ $(QT_QRC_LOCALE_CPP): $(QT_QRC_LOCALE) $(QT_QM)
 	  $(SED) -e '/^\*\*.*Created:/d' -e '/^\*\*.*by:/d' > $@
 	@rm $(@D)/temp_$(<F)
 
-$(QT_QRC_CPP): $(QT_QRC) $(QT_FORMS_H) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS)
+$(QT_QRC_CPP): $(QT_QRC) $(QT_FORMS_H) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS) $(RES_MOVIES) $(PROTOBUF_H)
 	@test -f $(RCC)
 	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(RCC) -name bltg $< | \
 	  $(SED) -e '/^\*\*.*Created:/d' -e '/^\*\*.*by:/d' > $@
 
-CLEAN_QT = $(nodist_qt_libbitcoinqt_a_SOURCES) $(QT_QM) $(QT_FORMS_H) qt/*.gcda qt/*.gcno qt/bltg/*.gcda qt/bltg/*.gcno qt/bltg/settings/*.gcda qt/bltg/settings/*.gcno qt/temp_bltg_locale.qrc
+CLEAN_QT = $(nodist_qt_libbitcoinqt_a_SOURCES) $(QT_QM) $(QT_FORMS_H) qt/*.gcda qt/*.gcno qt/temp_bltg_locale.qrc
 
 CLEANFILES += $(CLEAN_QT)
 

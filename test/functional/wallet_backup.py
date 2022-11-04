@@ -30,21 +30,13 @@ confirm 1/2/3/4 balances are same as before.
 Shutdown again, restore using importwallet,
 and confirm again balances are correct.
 """
-
-from decimal import Decimal
-import os
 from random import randint
 import shutil
 
-from test_framework.test_framework import BltgTestFramework
-from test_framework.util import (
-    assert_equal,
-    assert_raises_rpc_error,
-    connect_nodes,
-)
+from test_framework.test_framework import BitcoinTestFramework
+from test_framework.util import *
 
-
-class WalletBackupTest(BltgTestFramework):
+class WalletBackupTest(BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 4
         self.setup_clean_chain = True
@@ -78,9 +70,9 @@ class WalletBackupTest(BltgTestFramework):
 
         # Have the miner (node3) mine a block.
         # Must sync mempools before mining.
-        self.sync_mempools()
+        sync_mempools(self.nodes)
         self.nodes[3].generate(1)
-        self.sync_blocks()
+        sync_blocks(self.nodes)
 
     # As above, this mirrors the original bash test.
     def start_three(self):
@@ -98,20 +90,20 @@ class WalletBackupTest(BltgTestFramework):
         self.stop_node(2)
 
     def erase_three(self):
-        os.remove(self.options.tmpdir + "/node0/regtest/wallets/wallet.dat")
-        os.remove(self.options.tmpdir + "/node1/regtest/wallets/wallet.dat")
-        os.remove(self.options.tmpdir + "/node2/regtest/wallets/wallet.dat")
+        os.remove(self.options.tmpdir + "/node0/regtest/wallet.dat")
+        os.remove(self.options.tmpdir + "/node1/regtest/wallet.dat")
+        os.remove(self.options.tmpdir + "/node2/regtest/wallet.dat")
 
     def run_test(self):
         self.log.info("Generating initial blockchain")
         self.nodes[0].generate(1)
-        self.sync_blocks()
+        sync_blocks(self.nodes)
         self.nodes[1].generate(1)
-        self.sync_blocks()
+        sync_blocks(self.nodes)
         self.nodes[2].generate(1)
-        self.sync_blocks()
+        sync_blocks(self.nodes)
         self.nodes[3].generate(100)
-        self.sync_blocks()
+        sync_blocks(self.nodes)
 
         assert_equal(self.nodes[0].getbalance(), 250)
         assert_equal(self.nodes[1].getbalance(), 250)
@@ -162,13 +154,13 @@ class WalletBackupTest(BltgTestFramework):
         shutil.rmtree(self.options.tmpdir + "/node2/regtest/chainstate")
 
         # Restore wallets from backup
-        shutil.copyfile(tmpdir + "/node0/wallet.bak", tmpdir + "/node0/regtest/wallets/wallet.dat")
-        shutil.copyfile(tmpdir + "/node1/wallet.bak", tmpdir + "/node1/regtest/wallets/wallet.dat")
-        shutil.copyfile(tmpdir + "/node2/wallet.bak", tmpdir + "/node2/regtest/wallets/wallet.dat")
+        shutil.copyfile(tmpdir + "/node0/wallet.bak", tmpdir + "/node0/regtest/wallet.dat")
+        shutil.copyfile(tmpdir + "/node1/wallet.bak", tmpdir + "/node1/regtest/wallet.dat")
+        shutil.copyfile(tmpdir + "/node2/wallet.bak", tmpdir + "/node2/regtest/wallet.dat")
 
         self.log.info("Re-starting nodes")
         self.start_three()
-        self.sync_blocks()
+        sync_blocks(self.nodes)
 
         assert_equal(self.nodes[0].getbalance(), balance0)
         assert_equal(self.nodes[1].getbalance(), balance1)
@@ -192,7 +184,7 @@ class WalletBackupTest(BltgTestFramework):
         self.nodes[1].importwallet(tmpdir + "/node1/wallet.dump")
         self.nodes[2].importwallet(tmpdir + "/node2/wallet.dump")
 
-        self.sync_blocks()
+        sync_blocks(self.nodes)
 
         assert_equal(self.nodes[0].getbalance(), balance0)
         assert_equal(self.nodes[1].getbalance(), balance1)
@@ -200,10 +192,10 @@ class WalletBackupTest(BltgTestFramework):
 
         # Backup to source wallet file must fail
         sourcePaths = [
-            tmpdir + "/node0/regtest/wallets/wallet.dat",
-            tmpdir + "/node0/./regtest/wallets/wallet.dat",
-            tmpdir + "/node0/regtest/wallets/",
-            tmpdir + "/node0/regtest/wallets"]
+            tmpdir + "/node0/regtest/wallet.dat",
+            tmpdir + "/node0/./regtest/wallet.dat",
+            tmpdir + "/node0/regtest/",
+            tmpdir + "/node0/regtest"]
 
         for sourcePath in sourcePaths:
             assert_raises_rpc_error(-4, "backup failed", self.nodes[0].backupwallet, sourcePath)

@@ -19,9 +19,9 @@ public:
     explicit MNRow(QWidget *parent = nullptr);
     ~MNRow();
 
-    void updateView(QString address, const QString& label, QString status, bool wasCollateralAccepted);
+    void updateView(QString address, QString label, QString status, bool wasCollateralAccepted);
 
-Q_SIGNALS:
+signals:
     void onMenuClicked();
 private:
     Ui::MNRow *ui;

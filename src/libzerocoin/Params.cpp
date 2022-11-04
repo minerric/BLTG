@@ -10,7 +10,7 @@
 * @license    This project is released under the MIT license.
 **/
 // Copyright (c) 2017-2019 The PIVX developers
-// Copyright (c) 2022 The BLTG developers
+// Copyright (c) 2018-2022 The BLTG developers
 
 #include "Params.h"
 #include "ParamGeneration.h"

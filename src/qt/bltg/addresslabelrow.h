@@ -22,7 +22,7 @@ public:
     void init(bool isLightTheme, bool isHover);
 
     void updateState(bool isLightTheme, bool isHovered, bool isSelected);
-    void updateView(const QString& address, const QString& label);
+    void updateView(QString address, QString label);
 protected:
     virtual void enterEvent(QEvent *);
     virtual void leaveEvent(QEvent *);

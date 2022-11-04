@@ -1,6 +1,5 @@
-// Copyright (c) 2009-2014 The Bitcoin developers
-// Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2019 The PIVX developers
+// Copyright (c) 2011-2013 The Bitcoin developers
+// Copyright (c) 2017-2019 The PIVX developers
 // Copyright (c) 2018-2022 The BLTG developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -52,14 +51,14 @@ public:
      */
     static QString getDefaultDataDirectory();
 
-Q_SIGNALS:
+signals:
     void requestCheck();
     void stopThread();
 
-public Q_SLOTS:
+public slots:
     void setStatus(int status, const QString& message, quint64 bytesAvailable);
 
-private Q_SLOTS:
+private slots:
     void on_dataDirectory_textChanged(const QString& arg1);
     void on_ellipsisButton_clicked();
     void on_dataDirDefault_clicked();

@@ -1,13 +1,14 @@
 // Copyright (c) 2011-2013 The Bitcoin developers
 // Copyright (c) 2017-2019 The PIVX developers
+// Copyright (c) 2018-2022 The BLTG developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef BITCOIN_QT_PEERTABLEMODEL_H
 #define BITCOIN_QT_PEERTABLEMODEL_H
 
+#include "main.h"
 #include "net.h"
-#include "net_processing.h"
 
 #include <QAbstractTableModel>
 #include <QStringList>
@@ -52,10 +53,9 @@ public:
     void stopAutoRefresh();
 
     enum ColumnIndex {
-        NetNodeId = 0,
-        Address = 1,
-        Subversion = 2,
-        Ping = 3
+        Address = 0,
+        Subversion = 1,
+        Ping = 2
     };
 
     /** @name Methods overridden from QAbstractTableModel
@@ -69,7 +69,7 @@ public:
     void sort(int column, Qt::SortOrder order);
     /*@}*/
 
-public Q_SLOTS:
+public slots:
     void refresh();
 
 private:

@@ -43,7 +43,7 @@ Description: peer-to-peer network based digital currency - daemon
  check for double-spending.
  .
  Full transaction history is stored locally at each client.  This
- requires 18.5+ GB of space, slowly growing.
+ requires 10+ GB of space, slowly growing.
  .
  This package provides the daemon, bltgd, and the CLI tool
  bltg-cli to interact with the daemon.
@@ -59,6 +59,6 @@ Description: peer-to-peer network based digital currency - Qt GUI
  check for double-spending.
  .
  Full transaction history is stored locally at each client.  This
- requires 18.5+ GB of space, slowly growing.
+ requires 10+ GB of space, slowly growing.
  .
  This package provides Bltg-Qt, a GUI for BLTG based on Qt.

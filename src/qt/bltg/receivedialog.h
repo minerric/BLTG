@@ -5,7 +5,8 @@
 #ifndef RECEIVEDIALOG_H
 #define RECEIVEDIALOG_H
 
-#include "qt/bltg/focuseddialog.h"
+#include <QDialog>
+#include <QPixmap>
 
 class SendCoinsRecipient;
 
@@ -13,7 +14,7 @@ namespace Ui {
 class ReceiveDialog;
 }
 
-class ReceiveDialog : public FocusedDialog
+class ReceiveDialog : public QDialog
 {
     Q_OBJECT
 
@@ -21,13 +22,14 @@ public:
     explicit ReceiveDialog(QWidget *parent = nullptr);
     ~ReceiveDialog();
 
-    void updateQr(const QString& address);
+    void updateQr(QString address);
 
-private Q_SLOTS:
+private slots:
     void onCopy();
 private:
-    Ui::ReceiveDialog *ui{nullptr};
-    SendCoinsRecipient *info{nullptr};
+    Ui::ReceiveDialog *ui;
+    QPixmap *qrImage;
+    SendCoinsRecipient *info = nullptr;
 };
 
 #endif // RECEIVEDIALOG_H

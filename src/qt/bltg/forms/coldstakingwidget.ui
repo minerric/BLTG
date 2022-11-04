@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string notr="true">N/A</string>
+   <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_1" stretch="2,1">
    <property name="spacing">
@@ -55,10 +55,10 @@
            <number>0</number>
           </property>
           <property name="leftMargin">
-           <number>0</number>
+           <number>20</number>
           </property>
           <property name="rightMargin">
-           <number>0</number>
+           <number>20</number>
           </property>
           <item>
            <widget class="QWidget" name="containerTitle" native="true">
@@ -79,13 +79,13 @@
               <number>0</number>
              </property>
              <property name="leftMargin">
-              <number>20</number>
+              <number>0</number>
              </property>
              <property name="topMargin">
               <number>0</number>
              </property>
              <property name="rightMargin">
-              <number>20</number>
+              <number>0</number>
              </property>
              <property name="bottomMargin">
               <number>0</number>
@@ -98,7 +98,7 @@
                <item>
                 <widget class="QLabel" name="labelTitle">
                  <property name="text">
-                  <string>Cold Staking</string>
+                  <string>Title</string>
                  </property>
                 </widget>
                </item>
@@ -111,8 +111,7 @@
                   </size>
                  </property>
                  <property name="text">
-                  <string>You can delegate your BLTGs, letting a hot node (24/7 online node)
-stake on your behalf, while you keep the keys securely offline.</string>
+                  <string>TextLabel</string>
                  </property>
                 </widget>
                </item>
@@ -188,7 +187,7 @@ stake on your behalf, while you keep the keys securely offline.</string>
                       <enum>Qt::NoFocus</enum>
                      </property>
                      <property name="text">
-                      <string>Staker</string>
+                      <string/>
                      </property>
                      <property name="checkable">
                       <bool>true</bool>
@@ -216,7 +215,7 @@ stake on your behalf, while you keep the keys securely offline.</string>
                       <enum>Qt::NoFocus</enum>
                      </property>
                      <property name="text">
-                      <string>Delegation</string>
+                      <string/>
                      </property>
                      <property name="checkable">
                       <bool>true</bool>
@@ -235,7 +234,7 @@ stake on your behalf, while you keep the keys securely offline.</string>
                 <item alignment="Qt::AlignTop">
                  <widget class="QLabel" name="labelSubtitle2">
                   <property name="text">
-                   <string>Accept BLTG delegation / Delegate BLTG</string>
+                   <string>TextLabel</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -300,7 +299,7 @@ stake on your behalf, while you keep the keys securely offline.</string>
                 <string notr="true">padding-left:20px; padding-bottom:3px;</string>
                </property>
                <property name="text">
-                <string>Cold Staking address</string>
+                <string/>
                </property>
               </widget>
              </item>
@@ -352,7 +351,7 @@ stake on your behalf, while you keep the keys securely offline.</string>
                    padding:0px;</string>
                   </property>
                   <property name="text">
-                   <string>Owner address (optional, if empty a new address will be created)</string>
+                   <string>Owner Address (optional, if empty a new address will be created)</string>
                   </property>
                  </widget>
                 </item>
@@ -372,9 +371,6 @@ stake on your behalf, while you keep the keys securely offline.</string>
                   </property>
                   <property name="styleSheet">
                    <string notr="true"/>
-                  </property>
-                  <property name="placeholderText">
-                   <string>Enter owner address</string>
                   </property>
                  </widget>
                 </item>
@@ -457,7 +453,7 @@ stake on your behalf, while you keep the keys securely offline.</string>
                 <enum>Qt::NoFocus</enum>
                </property>
                <property name="text">
-                <string>Clear All</string>
+                <string/>
                </property>
               </widget>
              </item>
@@ -495,7 +491,7 @@ stake on your behalf, while you keep the keys securely offline.</string>
                 <enum>Qt::NoFocus</enum>
                </property>
                <property name="text">
-                <string>Delegate</string>
+                <string/>
                </property>
               </widget>
              </item>
@@ -546,7 +542,7 @@ stake on your behalf, while you keep the keys securely offline.</string>
               <item>
                <widget class="QLabel" name="labelListHistory">
                 <property name="text">
-                 <string>Delegated balance history</string>
+                 <string>List of delegated balance by address</string>
                 </property>
                </widget>
               </item>
@@ -714,7 +710,7 @@ stake on your behalf, while you keep the keys securely offline.</string>
                    <string notr="true"/>
                   </property>
                   <property name="text">
-                   <string>No delegations yet</string>
+                   <string>No balance delegated</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignCenter</set>
@@ -737,9 +733,6 @@ stake on your behalf, while you keep the keys securely offline.</string>
    <item>
     <widget class="QWidget" name="right" native="true">
      <layout class="QVBoxLayout" name="rightContainer">
-      <property name="spacing">
-       <number>0</number>
-      </property>
       <property name="leftMargin">
        <number>1</number>
       </property>
@@ -770,9 +763,6 @@ stake on your behalf, while you keep the keys securely offline.</string>
          <property name="rightMargin">
           <number>19</number>
          </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
          <item>
           <widget class="OptionButton" name="btnCoinControl" native="true">
            <property name="minimumSize">
@@ -797,100 +787,6 @@ stake on your behalf, while you keep the keys securely offline.</string>
           </widget>
          </item>
         </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QWidget" name="sortWidget" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <property name="leftMargin">
-          <number>19</number>
-         </property>
-         <property name="rightMargin">
-          <number>19</number>
-         </property>
-         <property name="bottomMargin">
-          <number>5</number>
-         </property>
-           <item>
-            <widget class="QLineEdit" name="lineEditFilter">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="contextMenuPolicy">
-              <enum>Qt::DefaultContextMenu</enum>
-             </property>
-             <property name="acceptDrops">
-              <bool>false</bool>
-             </property>
-             <property name="maxLength">
-              <number>40</number>
-             </property>
-             <property name="placeholderText">
-              <string>Filter</string>
-             </property>
-            </widget>
-           </item>
-         <item>
-          <spacer name="horizontalSpacer_6">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-              <enum>QSizePolicy::Preferred</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QComboBox" name="comboBoxSort">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>115</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="comboBoxSortOrder">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>75</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       <zorder>comboBoxSort</zorder>
-       <zorder>comboBoxSortOrder</zorder>
-       <zorder>lineEditFilter</zorder>
        </widget>
       </item>
       <item>

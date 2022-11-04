@@ -1,4 +1,4 @@
-// Copyright (c) 2019-2020 The PIVX developers
+// Copyright (c) 2019 The PIVX developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -35,47 +35,36 @@ public:
 
     void loadWalletModel() override;
 
-public Q_SLOTS:
+public slots:
     void onRequestClicked();
     void onMyAddressesClicked();
     void onNewAddressClicked();
 
-private Q_SLOTS:
+private slots:
     void changeTheme(bool isLightTheme, QString &theme) override ;
     void onLabelClicked();
     void onCopyClicked();
-    void refreshView(const QModelIndex& tl, const QModelIndex& br);
-    void refreshView(const QString& refreshAddress = QString());
+    void refreshView(QString refreshAddress = QString());
     void handleAddressClicked(const QModelIndex &index);
-    void onSortChanged(int idx);
-    void onSortOrderChanged(int idx);
-    void filterChanged(const QString& str);
-
 private:
-    Ui::ReceiveWidget *ui{nullptr};
+    Ui::ReceiveWidget *ui;
 
-    FurAbstractListItemDelegate *delegate{nullptr};
-    AddressTableModel* addressTableModel{nullptr};
-    AddressFilterProxyModel *filter{nullptr};
+    FurAbstractListItemDelegate *delegate;
+    AddressTableModel* addressTableModel = nullptr;
+    AddressFilterProxyModel *filter = nullptr;
 
-    QSpacerItem *spacer{nullptr};
+    QSpacerItem *spacer = nullptr;
 
     // Cached last address
-    SendCoinsRecipient *info{nullptr};
+    SendCoinsRecipient *info = nullptr;
+    // Cached qr
+    QPixmap *qrImage = nullptr;
 
-    // Cached sort type and order
-    AddressTableModel::ColumnIndex sortType = AddressTableModel::Label;
-    Qt::SortOrder sortOrder = Qt::AscendingOrder;
-
-    void updateQr(const QString& address);
+    void updateQr(QString address);
     void updateLabel();
     void showAddressGenerationDialog(bool isPaymentRequest);
-    void sortAddresses();
-    void onTransparentSelected(bool transparentSelected);
 
-    bool isShowingDialog{false};
-    // Whether the main section is presenting a shielded address or a regular one
-    bool shieldedMode{false};
+    bool isShowingDialog = false;
 
 };
 

@@ -1,15 +1,13 @@
-# http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.0.html
-
 [Desktop Entry]
-Encoding=UTF-8
+Version=1.0
 Name=BLTG Core
-Comment=BLTG Core QT main network
-GenericName=BLTG Digital Currency QT client main network
-Exec=bltg-core.qt %u
+Comment=BLTG P2P Cryptocurrency
+Comment[fr]=BLTG, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=BLTG, eşten eşe kriptografik sanal para birimi
+Exec=bltg-qt %u
 Terminal=false
 Type=Application
-Icon=${SNAP}/share/pixmaps/bltg.png
+Icon=bltg128
 MimeType=x-scheme-handler/bltg;
-Categories=X-Office;X-Finance;
-Keywords=internet;bltg;zbltg;bltg;core;wallet;qt;main;snap;launchpad;crypto;digital;currency;coin;token;zerocoin;
-Version=1.0
+Categories=Office;Finance;
+StartupWMClass=Bltg-qt

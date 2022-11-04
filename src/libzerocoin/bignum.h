@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Copyright (c) 2017-2019 The PIVX developers
-// Copyright (c) 2018-2019 The BLTG developers
+// Copyright (c) 2018-2022 The BLTG developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,13 +12,16 @@
 #include "config/bltg-config.h"
 #endif
 
+#if defined(USE_NUM_OPENSSL)
+#include <openssl/bn.h>
+#endif
+#if defined(USE_NUM_GMP)
 #include <gmp.h>
+#endif
 
 #include <stdexcept>
 #include <vector>
 #include <limits.h>
-
-#include "arith_uint256.h"
 #include "serialize.h"
 #include "uint256.h"
 #include "version.h"
@@ -34,7 +37,12 @@ public:
 /** C++ wrapper for BIGNUM */
 class CBigNum
 {
+#if defined(USE_NUM_OPENSSL)
+    BIGNUM* bn;
+#endif
+#if defined(USE_NUM_GMP)
     mpz_t bn;
+#endif
 public:
     CBigNum();
     CBigNum(const CBigNum& b);
@@ -62,6 +70,12 @@ public:
     */
     static CBigNum randBignum(const CBigNum& range);
 
+    /** Generates a cryptographically secure random k-bit number
+    * @param k The bit length of the number.
+    * @return
+    */
+    static CBigNum randKBitBignum(const uint32_t k);
+
     /**Returns the size in bits of the underlying bignum.
      *
      * @return the size
@@ -74,7 +88,7 @@ public:
     void setint64(int64_t sn);
     void setuint64(uint64_t n);
     void setuint256(uint256 n);
-    arith_uint256 getuint256() const;
+    uint256 getuint256() const;
     void setvch(const std::vector<unsigned char>& vch);
     std::vector<unsigned char> getvch() const;
     void SetDec(const std::string& str);
@@ -84,17 +98,22 @@ public:
     std::string GetHex() const;
     std::string GetDec() const;
 
-    template<typename Stream>
-    void Serialize(Stream& s) const
+    unsigned int GetSerializeSize(int nType=0, int nVersion=PROTOCOL_VERSION) const
     {
-        ::Serialize(s, getvch());
+        return ::GetSerializeSize(getvch(), nType, nVersion);
     }
 
     template<typename Stream>
-    void Unserialize(Stream& s)
+    void Serialize(Stream& s, int nType=0, int nVersion=PROTOCOL_VERSION) const
+    {
+        ::Serialize(s, getvch(), nType, nVersion);
+    }
+
+    template<typename Stream>
+    void Unserialize(Stream& s, int nType=0, int nVersion=PROTOCOL_VERSION)
     {
         std::vector<unsigned char> vch;
-        ::Unserialize(s, vch);
+        ::Unserialize(s, vch, nType, nVersion);
         setvch(vch);
     }
 
@@ -135,6 +154,14 @@ public:
     CBigNum inverse(const CBigNum& m) const;
 
     /**
+     * Generates a random (safe) prime of numBits bits
+     * @param numBits the number of bits
+     * @param safe true for a safe prime
+     * @return the prime
+     */
+    static CBigNum generatePrime(const unsigned int numBits, bool safe = false);
+
+    /**
      * Calculates the greatest common divisor (GCD) of two numbers.
      * @param m the second element
      * @return the GCD
@@ -147,7 +174,12 @@ public:
     *                          default causes error rate of 2^-80.
     * @return true if prime
     */
+#if defined(USE_NUM_OPENSSL)
+    bool isPrime(const int checks=BN_prime_checks) const;
+#endif
+#if defined(USE_NUM_GMP)
     bool isPrime(const int checks=15) const;
+#endif
 
     bool isOne() const;
     bool operator!() const;
@@ -178,6 +210,91 @@ public:
     friend inline bool operator>(const CBigNum& a, const CBigNum& b);
 };
 
+#if defined(USE_NUM_OPENSSL)
+class CAutoBN_CTX
+{
+protected:
+    BN_CTX* pctx;
+    BN_CTX* operator=(BN_CTX* pnew) { return pctx = pnew; }
+
+public:
+    CAutoBN_CTX()
+    {
+        pctx = BN_CTX_new();
+        if (pctx == NULL)
+            throw bignum_error("CAutoBN_CTX : BN_CTX_new() returned NULL");
+    }
+
+    ~CAutoBN_CTX()
+    {
+        if (pctx != NULL)
+            BN_CTX_free(pctx);
+    }
+
+    operator BN_CTX*() { return pctx; }
+    BN_CTX& operator*() { return *pctx; }
+    BN_CTX** operator&() { return &pctx; }
+    bool operator!() { return (pctx == NULL); }
+};
+
+inline const CBigNum operator+(const CBigNum& a, const CBigNum& b) {
+    CBigNum r;
+    if (!BN_add(r.bn, a.bn, b.bn))
+        throw bignum_error("CBigNum::operator+ : BN_add failed");
+    return r;
+}
+inline const CBigNum operator-(const CBigNum& a, const CBigNum& b) {
+    CBigNum r;
+    if (!BN_sub(r.bn, a.bn, b.bn))
+        throw bignum_error("CBigNum::operator- : BN_sub failed");
+    return r;
+}
+inline const CBigNum operator-(const CBigNum& a) {
+    CBigNum r(a);
+    BN_set_negative(r.bn, !BN_is_negative(r.bn));
+    return r;
+}
+inline const CBigNum operator*(const CBigNum& a, const CBigNum& b) {
+    CAutoBN_CTX pctx;
+    CBigNum r;
+    if (!BN_mul(r.bn, a.bn, b.bn, pctx))
+        throw bignum_error("CBigNum::operator* : BN_mul failed");
+    return r;
+}
+inline const CBigNum operator/(const CBigNum& a, const CBigNum& b) {
+    CAutoBN_CTX pctx;
+    CBigNum r;
+    if (!BN_div(r.bn, NULL, a.bn, b.bn, pctx))
+        throw bignum_error("CBigNum::operator/ : BN_div failed");
+    return r;
+}
+inline const CBigNum operator%(const CBigNum& a, const CBigNum& b) {
+    CAutoBN_CTX pctx;
+    CBigNum r;
+    if (!BN_nnmod(r.bn, a.bn, b.bn, pctx))
+        throw bignum_error("CBigNum::operator% : BN_div failed");
+    return r;
+}
+inline const CBigNum operator<<(const CBigNum& a, unsigned int shift) {
+    CBigNum r;
+    if (!BN_lshift(r.bn, a.bn, shift))
+        throw bignum_error("CBigNum:operator<< : BN_lshift failed");
+    return r;
+}
+inline const CBigNum operator>>(const CBigNum& a, unsigned int shift) {
+    CBigNum r = a;
+    r >>= shift;
+    return r;
+}
+inline bool operator==(const CBigNum& a, const CBigNum& b) { return (BN_cmp(a.bn, b.bn) == 0); }
+inline bool operator!=(const CBigNum& a, const CBigNum& b) { return (BN_cmp(a.bn, b.bn) != 0); }
+inline bool operator<=(const CBigNum& a, const CBigNum& b) { return (BN_cmp(a.bn, b.bn) <= 0); }
+inline bool operator>=(const CBigNum& a, const CBigNum& b) { return (BN_cmp(a.bn, b.bn) >= 0); }
+inline bool operator<(const CBigNum& a, const CBigNum& b)  { return (BN_cmp(a.bn, b.bn) < 0); }
+inline bool operator>(const CBigNum& a, const CBigNum& b)  { return (BN_cmp(a.bn, b.bn) > 0); }
+#endif
+
+#if defined(USE_NUM_GMP)
 inline const CBigNum operator+(const CBigNum& a, const CBigNum& b) {
     CBigNum r;
     mpz_add(r.bn, a.bn, b.bn);
@@ -224,6 +341,7 @@ inline bool operator<=(const CBigNum& a, const CBigNum& b) { return (mpz_cmp(a.b
 inline bool operator>=(const CBigNum& a, const CBigNum& b) { return (mpz_cmp(a.bn, b.bn) >= 0); }
 inline bool operator<(const CBigNum& a, const CBigNum& b)  { return (mpz_cmp(a.bn, b.bn) < 0); }
 inline bool operator>(const CBigNum& a, const CBigNum& b)  { return (mpz_cmp(a.bn, b.bn) > 0); }
+#endif
 
 inline std::ostream& operator<<(std::ostream &strm, const CBigNum &b) { return strm << b.ToString(10); }
 
@@ -235,4 +353,4 @@ const CBigNum BN_ONE = CBigNum(1);
 const CBigNum BN_TWO = CBigNum(2);
 const CBigNum BN_THREE = CBigNum(3);
 
-#endif // BITCOIN_BIGNUM_H
+#endif

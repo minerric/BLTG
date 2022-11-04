@@ -14,7 +14,7 @@
  * for both bltgd and bltg-qt, to make it harder for attackers to
  * target servers or GUI users specifically.
  */
-const std::string CLIENT_NAME(PACKAGE_NAME);
+const std::string CLIENT_NAME("BLTG Core");
 
 /**
  * Client version number
@@ -46,8 +46,8 @@ const std::string CLIENT_NAME(PACKAGE_NAME);
 //! git will put "#define GIT_ARCHIVE 1" on the next line inside archives. 
 #define GIT_ARCHIVE 1
 #ifdef GIT_ARCHIVE
-#define GIT_COMMIT_ID "e05705aea04fab82d3c2026c01aecc84a69ac71d"
-#define GIT_COMMIT_DATE "Sun, 19 Dec 2021 15:37:48 -0300"
+#define GIT_COMMIT_ID "b005d840a8e694a9e0726131a580fc72dcab2b53"
+#define GIT_COMMIT_DATE "Sun, 15 Dec 2019 03:51:34 -0800"
 #endif
 
 #define BUILD_DESC_WITH_SUFFIX(maj, min, rev, build, suffix) \
@@ -69,7 +69,16 @@ const std::string CLIENT_NAME(PACKAGE_NAME);
 #endif
 #endif
 
+#ifndef BUILD_DATE
+#ifdef GIT_COMMIT_DATE
+#define BUILD_DATE GIT_COMMIT_DATE
+#else
+#define BUILD_DATE __DATE__ ", " __TIME__
+#endif
+#endif
+
 const std::string CLIENT_BUILD(BUILD_DESC CLIENT_VERSION_SUFFIX);
+const std::string CLIENT_DATE(BUILD_DATE);
 
 static std::string FormatVersion(int nVersion)
 {

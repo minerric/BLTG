@@ -9,12 +9,13 @@
 #include <vector>
 
 #include <boost/thread/condition_variable.hpp>
+#include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
 
 template <typename T>
 class CCheckQueueControl;
 
-/**
+/** 
  * Queue for verifications that have to be performed.
   * The verifications are represented by a type T, which must provide an
   * operator(), returning a bool.
@@ -57,6 +58,9 @@ private:
      */
     unsigned int nTodo;
 
+    //! Whether we're shutting down.
+    bool fQuit;
+
     //! The maximum number of elements to be processed in one batch
     unsigned int nBatchSize;
 
@@ -84,7 +88,7 @@ private:
                 }
                 // logically, the do loop starts here
                 while (queue.empty()) {
-                    if (fMaster && nTodo == 0) {
+                    if ((fMaster || fQuit) && nTodo == 0) {
                         nTotal--;
                         bool fRet = fAllOk;
                         // reset the status for new work later
@@ -123,7 +127,7 @@ private:
 
 public:
     //! Create a new check queue
-    explicit CCheckQueue(unsigned int nBatchSizeIn) : nIdle(0), nTotal(0), fAllOk(true), nTodo(0), nBatchSize(nBatchSizeIn) {}
+    CCheckQueue(unsigned int nBatchSizeIn) : nIdle(0), nTotal(0), fAllOk(true), nTodo(0), fQuit(false), nBatchSize(nBatchSizeIn) {}
 
     //! Worker thread
     void Thread()
@@ -163,7 +167,7 @@ public:
     }
 };
 
-/**
+/** 
  * RAII-style controller object for a CCheckQueue that guarantees the passed
  * queue is finished before continuing.
  */

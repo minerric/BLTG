@@ -1,5 +1,6 @@
 // Copyright (c) 2011-2013 The Bitcoin developers
-// Copyright (c) 2017-2020 The PIVX developers
+// Copyright (c) 2017-2019 The PIVX developers
+// Copyright (c) 2018-2022 The BLTG developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,9 +11,6 @@
 #include "guiutil.h"
 #include "net.h"
 #include "sync.h"
-#include "validation.h"  // cs_main
-
-#include <algorithm>
 
 #include <QDebug>
 #include <QList>
@@ -26,9 +24,7 @@ bool NodeLessThan::operator()(const CNodeCombinedStats& left, const CNodeCombine
     if (order == Qt::DescendingOrder)
         std::swap(pLeft, pRight);
 
-    switch(column) {
-    case PeerTableModel::NetNodeId:
-        return pLeft->nodeid < pRight->nodeid;
+    switch (column) {
     case PeerTableModel::Address:
         return pLeft->addrName.compare(pRight->addrName) < 0;
     case PeerTableModel::Subversion:
@@ -57,18 +53,21 @@ public:
     void refreshPeers()
     {
         {
+            TRY_LOCK(cs_vNodes, lockNodes);
+            if (!lockNodes) {
+                // skip the refresh if we can't immediately get the lock
+                return;
+            }
             cachedNodeStats.clear();
-            std::vector<CNodeStats> vstats;
-            if(g_connman)
-                g_connman->GetNodeStats(vstats);
-            cachedNodeStats.reserve(vstats.size());
-            for (const CNodeStats& nodestats : vstats) {
+
+            cachedNodeStats.reserve(vNodes.size());
+            foreach (CNode* pnode, vNodes) {
                 CNodeCombinedStats stats;
                 stats.nodeStateStats.nMisbehavior = 0;
                 stats.nodeStateStats.nSyncHeight = -1;
                 stats.nodeStateStats.nCommonHeight = -1;
                 stats.fNodeStateStatsAvailable = false;
-                stats.nodeStats = nodestats;
+                pnode->copyStats(stats.nodeStats);
                 cachedNodeStats.append(stats);
             }
         }
@@ -84,13 +83,13 @@ public:
 
         if (sortColumn >= 0)
             // sort cacheNodeStats (use stable sort to prevent rows jumping around unneceesarily)
-            std::stable_sort(cachedNodeStats.begin(), cachedNodeStats.end(), NodeLessThan(sortColumn, sortOrder));
+            qStableSort(cachedNodeStats.begin(), cachedNodeStats.end(), NodeLessThan(sortColumn, sortOrder));
 
         // build index map
         mapNodeRows.clear();
         int row = 0;
-        for (const CNodeCombinedStats& stats : cachedNodeStats)
-            mapNodeRows.emplace(stats.nodeStats.nodeid, row++);
+        foreach (const CNodeCombinedStats& stats, cachedNodeStats)
+            mapNodeRows.insert(std::pair<NodeId, int>(stats.nodeStats.nodeid, row++));
     }
 
     int size()
@@ -112,14 +111,14 @@ PeerTableModel::PeerTableModel(ClientModel* parent) : QAbstractTableModel(parent
                                                       clientModel(parent),
                                                       timer(0)
 {
-    columns << tr("NodeID") << tr("Address/Hostname") << tr("Version") << tr("Ping Time");
+    columns << tr("Address/Hostname") << tr("Version") << tr("Ping Time");
     priv = new PeerTablePriv();
     // default to unsorted
     priv->sortColumn = -1;
 
     // set up timer for auto refresh
     timer = new QTimer();
-    connect(timer, &QTimer::timeout, this, &PeerTableModel::refresh);
+    connect(timer, SIGNAL(timeout()), SLOT(refresh()));
     timer->setInterval(MODEL_UPDATE_DELAY);
 
     // load initial data
@@ -157,9 +156,7 @@ QVariant PeerTableModel::data(const QModelIndex& index, int role) const
     CNodeCombinedStats* rec = static_cast<CNodeCombinedStats*>(index.internalPointer());
 
     if (role == Qt::DisplayRole) {
-        switch(index.column()) {
-        case NetNodeId:
-            return rec->nodeStats.nodeid;
+        switch (index.column()) {
         case Address:
             return QString::fromStdString(rec->nodeStats.addrName);
         case Subversion:
@@ -188,7 +185,7 @@ QVariant PeerTableModel::headerData(int section, Qt::Orientation orientation, in
 Qt::ItemFlags PeerTableModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
-        return Qt::NoItemFlags;
+        return 0;
 
     Qt::ItemFlags retval = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     return retval;
@@ -213,9 +210,9 @@ const CNodeCombinedStats* PeerTableModel::getNodeStats(int idx)
 
 void PeerTableModel::refresh()
 {
-    Q_EMIT layoutAboutToBeChanged();
+    emit layoutAboutToBeChanged();
     priv->refreshPeers();
-    Q_EMIT layoutChanged();
+    emit layoutChanged();
 }
 
 int PeerTableModel::getRowByNodeId(NodeId nodeid)

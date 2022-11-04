@@ -4,18 +4,10 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test mempool limiting together/eviction with the wallet."""
 
-from decimal import Decimal
+from test_framework.test_framework import BitcoinTestFramework
+from test_framework.util import *
 
-from test_framework.test_framework import BltgTestFramework
-from test_framework.util import (
-    assert_equal,
-    assert_greater_than,
-    create_confirmed_utxos,
-    create_lots_of_big_transactions,
-    gen_return_txouts
-)
-
-class MempoolLimitTest(BltgTestFramework):
+class MempoolLimitTest(BitcoinTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 1

@@ -18,10 +18,13 @@ AddNewAddressDialog::AddNewAddressDialog(QWidget *parent) :
     ui->frameContainer->setProperty("cssClass", "container-dialog");
 
     // Title
+
+    ui->labelTitle->setText("New Address");
     ui->labelTitle->setProperty("cssClass", "text-title-dialog");
 
     // Buttons
     ui->btnCancel->setProperty("cssClass", "btn-dialog-cancel");
+    ui->btnSave->setText("SAVE");
     ui->btnSave->setProperty("cssClass", "btn-primary");
 }
 

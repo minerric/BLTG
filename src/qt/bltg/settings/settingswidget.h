@@ -1,4 +1,4 @@
-// Copyright (c) 2019-2020 The PIVX developers
+// Copyright (c) 2019 The PIVX developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -8,13 +8,13 @@
 #include <QWidget>
 #include "qt/bltg/pwidget.h"
 #include "qt/bltg/settings/settingsbackupwallet.h"
-#include "qt/bltg/settings/settingsexportcsv.h"
 #include "qt/bltg/settings/settingsbittoolwidget.h"
 #include "qt/bltg/settings/settingssignmessagewidgets.h"
 #include "qt/bltg/settings/settingswalletrepairwidget.h"
 #include "qt/bltg/settings/settingswalletoptionswidget.h"
 #include "qt/bltg/settings/settingsmainoptionswidget.h"
 #include "qt/bltg/settings/settingsdisplayoptionswidget.h"
+#include "qt/bltg/settings/settingsmultisendwidget.h"
 #include "qt/bltg/settings/settingsinformationwidget.h"
 #include "qt/bltg/settings/settingsconsolewidget.h"
 
@@ -40,14 +40,12 @@ public:
     void loadWalletModel() override;
     void setMapper();
     void showDebugConsole();
-    void showInformation();
-    void openNetworkMonitor();
 
-Q_SIGNALS:
+signals:
     /** Get restart command-line parameters and handle restart */
     void handleRestart(QStringList args);
 
-private Q_SLOTS:
+private slots:
     // File
     void onFileClicked();
     void onBackupWalletClicked();
@@ -56,7 +54,7 @@ private Q_SLOTS:
     // Wallet Configuration
     void onConfigurationClicked();
     void onBipToolClicked();
-    void onExportCSVClicked();
+    void onMultisendClicked();
 
     // Options
     void onOptionsClicked();
@@ -77,31 +75,26 @@ private Q_SLOTS:
     void onAboutClicked();
     void onResetAction();
     void onSaveOptionsClicked();
-
 private:
-    Ui::SettingsWidget *ui{nullptr};
-    int navAreaBaseHeight{0};
+    Ui::SettingsWidget *ui;
 
-    SettingsBackupWallet *settingsBackupWallet{nullptr};
-    SettingsExportCSV *settingsExportCsvWidget{nullptr};
-    SettingsBitToolWidget *settingsBitToolWidget{nullptr};
-    SettingsSignMessageWidgets *settingsSingMessageWidgets{nullptr};
-    SettingsWalletRepairWidget *settingsWalletRepairWidget{nullptr};
-    SettingsWalletOptionsWidget *settingsWalletOptionsWidget{nullptr};
-    SettingsMainOptionsWidget *settingsMainOptionsWidget{nullptr};
-    SettingsDisplayOptionsWidget *settingsDisplayOptionsWidget{nullptr};
-    SettingsInformationWidget *settingsInformationWidget{nullptr};
-    SettingsConsoleWidget *settingsConsoleWidget{nullptr};
+    SettingsBackupWallet *settingsBackupWallet;
+    SettingsBitToolWidget *settingsBitToolWidget;
+    SettingsSignMessageWidgets *settingsSingMessageWidgets;
+    SettingsWalletRepairWidget *settingsWalletRepairWidget;
+    SettingsWalletOptionsWidget *settingsWalletOptionsWidget;
+    SettingsMainOptionsWidget *settingsMainOptionsWidget;
+    SettingsDisplayOptionsWidget *settingsDisplayOptionsWidget;
+    SettingsMultisendWidget *settingsMultisendWidget;
+    SettingsInformationWidget *settingsInformationWidget;
+    SettingsConsoleWidget *settingsConsoleWidget;
 
-    QDataWidgetMapper* mapper{nullptr};
+    QDataWidgetMapper* mapper;
 
     QList<QPushButton*> options;
-    // Map of: menu button -> sub menu items
-    QMap <QPushButton*, QWidget*> menus;
 
     void selectOption(QPushButton* option);
-    bool openStandardDialog(const QString& title = "", const QString& body = "", const QString& okBtn = "OK", const QString& cancelBtn = "");
-    void selectMenu(QPushButton* btn);
+    bool openStandardDialog(QString title = "", QString body = "", QString okBtn = "OK", QString cancelBtn = "");
 };
 
 #endif // SETTINGSWIDGET_H

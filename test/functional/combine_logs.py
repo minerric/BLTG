@@ -1,47 +1,29 @@
 #!/usr/bin/env python3
-# Copyright (c) 2015-2021 The Bitcoin Core developers
-# Distributed under the MIT software license, see the accompanying
-# file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Combine logs from multiple bitcoin nodes as well as the test_framework log.
 
 This streams the combined log output to stdout. Use combine_logs.py > outputfile
-to write to an outputfile.
-If no argument is provided, the most recent test directory will be used.
-"""
+to write to an outputfile."""
 
 import argparse
 from collections import defaultdict, namedtuple
-import glob
 import heapq
 import itertools
 import os
 import re
 import sys
-import tempfile
-
-# N.B.: don't import any local modules here - this script must remain executable
-# without the parent module installed.
-
-# Should match same symbol in `test_framework.test_framework`.
-TMPDIR_PREFIX = "bltg_func_test_"
 
 # Matches on the date format at the start of the log event
-TIMESTAMP_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z")
+TIMESTAMP_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}")
 
 LogEvent = namedtuple('LogEvent', ['timestamp', 'source', 'event'])
 
 def main():
     """Main function. Parses args, reads the log files and renders them as text or html."""
 
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument(
-        'testdir', nargs='?', default='',
-        help=('temporary test directory to combine logs from. '
-              'Defaults to the most recent'))
+    parser = argparse.ArgumentParser(usage='%(prog)s [options] <test temporary directory>', description=__doc__)
     parser.add_argument('-c', '--color', dest='color', action='store_true', help='outputs the combined log with events colored by source (requires posix terminal colors. Use less -r for viewing)')
     parser.add_argument('--html', dest='html', action='store_true', help='outputs the combined log as html. Requires jinja2. pip install jinja2')
-    args = parser.parse_args()
+    args, unknown_args = parser.parse_known_args()
 
     if args.color and os.name != 'posix':
         print("Color output requires posix terminal colors.")
@@ -51,15 +33,14 @@ def main():
         print("Only one out of --color or --html should be specified")
         sys.exit(1)
 
-    testdir = args.testdir or find_latest_test_dir()
+    # There should only be one unknown argument - the path of the temporary test directory
+    if len(unknown_args) != 1:
+        print("Unexpected arguments" + str(unknown_args))
+        sys.exit(1)
 
-    if not args.testdir:
-        print("Opening latest test directory: {}".format(testdir), file=sys.stderr)
-
-    log_events = read_logs(testdir)
+    log_events = read_logs(unknown_args[0])
 
     print_logs(log_events, color=args.color, html=args.html)
-
 
 def read_logs(tmp_dir):
     """Reads log files.
@@ -67,45 +48,14 @@ def read_logs(tmp_dir):
     Delegates to generator function get_log_events() to provide individual log events
     for each of the input log files."""
 
-    # Find out what the folder is called that holds the debug.log file
-    chain = glob.glob("{}/node0/*/debug.log".format(tmp_dir))
-    if chain:
-        chain = chain[0]  # pick the first one if more than one chain was found (should never happen)
-        chain = re.search(r'node0/(.+?)/debug\.log$', chain).group(1)  # extract the chain name
-    else:
-        chain = 'regtest'  # fallback to regtest (should only happen when none exists)
-
     files = [("test", "%s/test_framework.log" % tmp_dir)]
     for i in itertools.count():
-        logfile = "{}/node{}/{}/debug.log".format(tmp_dir, i, chain)
+        logfile = "{}/node{}/regtest/debug.log".format(tmp_dir, i)
         if not os.path.isfile(logfile):
             break
         files.append(("node%d" % i, logfile))
 
     return heapq.merge(*[get_log_events(source, f) for source, f in files])
-
-
-def find_latest_test_dir():
-    """Returns the latest tmpfile test directory prefix."""
-    tmpdir = tempfile.gettempdir()
-
-    def join_tmp(basename):
-        return os.path.join(tmpdir, basename)
-
-    def is_valid_test_tmpdir(basename):
-        fullpath = join_tmp(basename)
-        return (
-            os.path.isdir(fullpath)
-            and basename.startswith(TMPDIR_PREFIX)
-            and os.access(fullpath, os.R_OK)
-        )
-
-    testdir_paths = [
-        join_tmp(name) for name in os.listdir(tmpdir) if is_valid_test_tmpdir(name)
-    ]
-
-    return max(testdir_paths, key=os.path.getmtime) if testdir_paths else None
-
 
 def get_log_events(source, logfile):
     """Generator function that returns individual log events.
@@ -113,7 +63,7 @@ def get_log_events(source, logfile):
     Log events may be split over multiple lines. We use the timestamp
     regex match as the marker for a new log event."""
     try:
-        with open(logfile, 'r', encoding="utf8") as infile:
+        with open(logfile, 'r') as infile:
             event = ''
             timestamp = ''
             for line in infile:

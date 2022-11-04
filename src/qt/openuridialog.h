@@ -24,8 +24,11 @@ public:
     QString getURI();
     void showEvent(QShowEvent *event) override;
 
-protected Q_SLOTS:
+protected slots:
     void accept() override;
+
+private slots:
+    void on_selectFileButton_clicked();
 
 private:
     Ui::OpenURIDialog* ui;

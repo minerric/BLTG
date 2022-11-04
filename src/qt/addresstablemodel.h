@@ -1,5 +1,6 @@
 // Copyright (c) 2011-2013 The Bitcoin developers
-// Copyright (c) 2017-2020 The PIVX developers
+// Copyright (c) 2017-2019 The PIVX developers
+// Copyright (c) 2018-2022 The BLTG developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -28,12 +29,11 @@ public:
     enum ColumnIndex {
         Label = 0,  /**< User specified label */
         Address = 1, /**< Bitcoin address */
-        Date = 2, /**< Address creation date */
-        Type = 3 /**< Address Type */
+        Date = 2 /**< Address creation date */
     };
 
     enum RoleIndex {
-        TypeRole = Qt::UserRole /**< Type of address (#Send, #Receive, #ColdStaking, #ColdStakingSend, #Delegator, #Delegable) */
+        TypeRole = Qt::UserRole /**< Type of address (#Send or #Receive) */
     };
 
     /** Return status of edit/insert operation */
@@ -49,12 +49,9 @@ public:
     static const QString Send;    /**< Specifies send address */
     static const QString Receive; /**< Specifies receive address */
     static const QString Zerocoin; /**< Specifies stealth address */
-    static const QString Delegator; /**< Specifies cold staking addresses which delegated tokens to this wallet and ARE being staked */
-    static const QString Delegable; /**< Specifies cold staking addresses which delegated tokens to this wallet*/
+    static const QString Delegators; /**< Specifies cold staking addresses which delegated tokens to this wallet */
     static const QString ColdStaking; /**< Specifies cold staking own addresses */
     static const QString ColdStakingSend; /**< Specifies send cold staking addresses (simil 'contacts')*/
-    static const QString ShieldedReceive; /**< Specifies shielded send address */
-    static const QString ShieldedSend; /**< Specifies shielded receive address */
 
     /** @name Methods overridden from QAbstractTableModel
         @{*/
@@ -64,8 +61,6 @@ public:
     int sizeRecv() const;
     int sizeDell() const;
     int sizeColdSend() const;
-    int sizeShieldedSend() const;
-    int sizeSendAll() const;
     void notifyChange(const QModelIndex &index);
     QVariant data(const QModelIndex& index, int role) const;
     bool setData(const QModelIndex& index, const QVariant& value, int role);
@@ -102,21 +97,21 @@ public:
     /**
      * Return last unused address
      */
-    QString getAddressToShow(bool shielded = false) const;
+    QString getAddressToShow() const;
 
     EditStatus getEditStatus() const { return editStatus; }
 
 private:
-    WalletModel* walletModel{nullptr};
-    CWallet* wallet{nullptr};
-    AddressTablePriv* priv{nullptr};
-    QStringList columns{};
-    EditStatus editStatus{OK};
+    WalletModel* walletModel;
+    CWallet* wallet;
+    AddressTablePriv* priv;
+    QStringList columns;
+    EditStatus editStatus;
 
     /** Notify listeners that data changed. */
     void emitDataChanged(int index);
 
-public Q_SLOTS:
+public slots:
     /* Update address list from core.
      */
     void updateEntry(const QString& address, const QString& label, bool isMine, const QString& purpose, int status);

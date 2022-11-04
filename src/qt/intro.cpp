@@ -5,29 +5,22 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#if defined(HAVE_CONFIG_H)
-#include "config/bltg-config.h"
-#endif
-
 #include "intro.h"
 #include "ui_intro.h"
-
-#include "fs.h"
 #include "guiutil.h"
 
-#include "util/system.h"
+#include "util.h"
 #include "qt/bltg/qtutils.h"
+
+#include <boost/filesystem.hpp>
 
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
+
+/* Minimum free space (in bytes) needed for data directory */
 static const uint64_t GB_BYTES = 1000000000LL;
-/* Minimum free space (in GB) needed for mainnet data directory */
-static const uint64_t BLOCK_CHAIN_SIZE = 25;
-/* Minimum free space (in GB) needed for testnet data directory */
-static const uint64_t TESTNET_BLOCK_CHAIN_SIZE = 1;
-/* Total required space (in GB) depending on network */
-static uint64_t requiredSpace;
+static const uint64_t BLOCK_CHAIN_SIZE = 1LL * GB_BYTES;
 
 /* Check free space asynchronously to prevent hanging the UI thread.
 
@@ -51,10 +44,10 @@ public:
         ST_ERROR
     };
 
-public Q_SLOTS:
+public slots:
     void check();
 
-Q_SIGNALS:
+signals:
     void reply(int status, const QString& message, quint64 available);
 
 private:
@@ -70,6 +63,7 @@ FreespaceChecker::FreespaceChecker(Intro* intro)
 
 void FreespaceChecker::check()
 {
+    namespace fs = boost::filesystem;
     QString dataDirStr = intro->getPathToCheck();
     fs::path dataDir = GUIUtil::qstringToBoostPath(dataDirStr);
     uint64_t freeBytesAvailable = 0;
@@ -106,7 +100,7 @@ void FreespaceChecker::check()
         replyStatus = ST_ERROR;
         replyMessage = tr("Cannot create data directory here.");
     }
-    Q_EMIT reply(replyStatus, replyMessage, freeBytesAvailable);
+    emit reply(replyStatus, replyMessage, freeBytesAvailable);
 }
 
 
@@ -121,8 +115,8 @@ Intro::Intro(QWidget* parent) : QDialog(parent, Qt::WindowSystemMenuHint | Qt::W
     setCssProperty(ui->frame, "container-welcome-step2");
     setCssProperty(ui->container, "container-welcome-stack");
     setCssProperty(ui->frame_2, "container-welcome");
-    setCssProperty(ui->welcomeLabel, "text-title-welcome");
-    setCssProperty(ui->storageLabel, "text-intro-white");
+    setCssProperty(ui->label_2, "text-title-welcome");
+    setCssProperty(ui->label_4, "text-intro-white");
     setCssProperty(ui->sizeWarningLabel, "text-intro-white");
     setCssProperty(ui->freeSpace, "text-intro-white");
     setCssProperty(ui->errorMessage, "text-intro-white");
@@ -134,12 +128,10 @@ Intro::Intro(QWidget* parent) : QDialog(parent, Qt::WindowSystemMenuHint | Qt::W
     setCssBtnPrimary(ui->pushButtonOk);
     setCssBtnSecondary(ui->pushButtonCancel);
 
-    connect(ui->pushButtonOk, &QPushButton::clicked, this, &Intro::accept);
-    connect(ui->pushButtonCancel, &QPushButton::clicked, this, &Intro::close);
+    connect(ui->pushButtonOk, SIGNAL(clicked()), this, SLOT(accept()));
+    connect(ui->pushButtonCancel, SIGNAL(clicked()), this, SLOT(close()));
 
-    ui->welcomeLabel->setText(ui->welcomeLabel->text().arg(PACKAGE_NAME));
-    ui->storageLabel->setText(ui->storageLabel->text().arg(PACKAGE_NAME));
-    ui->sizeWarningLabel->setText(ui->sizeWarningLabel->text().arg(PACKAGE_NAME).arg(requiredSpace));
+    ui->sizeWarningLabel->setText(ui->sizeWarningLabel->text().arg(BLOCK_CHAIN_SIZE / GB_BYTES));
     startThread();
 }
 
@@ -147,7 +139,7 @@ Intro::~Intro()
 {
     delete ui;
     /* Ensure thread is finished before it is deleted */
-    Q_EMIT stopThread();
+    emit stopThread();
     thread->wait();
 }
 
@@ -179,10 +171,11 @@ QString Intro::getDefaultDataDirectory()
 
 bool Intro::pickDataDirectory()
 {
+    namespace fs = boost::filesystem;
     QSettings settings;
     /* If data directory provided on command line, no need to look at settings
        or show a picking dialog */
-    if (!gArgs.GetArg("-datadir", "").empty())
+    if (!GetArg("-datadir", "").empty())
         return true;
     /* 1) Default data directory for operating system */
     QString dataDir = getDefaultDataDirectory();
@@ -190,15 +183,8 @@ bool Intro::pickDataDirectory()
     dataDir = settings.value("strDataDir", dataDir).toString();
 
 
-    if (!fs::exists(GUIUtil::qstringToBoostPath(dataDir)) || gArgs.GetBoolArg("-choosedatadir", DEFAULT_CHOOSE_DATADIR)) {
+    if (!fs::exists(GUIUtil::qstringToBoostPath(dataDir)) || GetBoolArg("-choosedatadir", false)) {
         // If current default data directory does not exist, let the user choose one
-        if (gArgs.GetBoolArg("-testnet", false)) {
-            requiredSpace = TESTNET_BLOCK_CHAIN_SIZE;
-        } else if (gArgs.GetBoolArg("-regtest", false)) {
-            requiredSpace = 0;
-        } else {
-            requiredSpace = BLOCK_CHAIN_SIZE;
-        }
         Intro intro;
         intro.setDataDirectory(dataDir);
         intro.setWindowIcon(QIcon(":icons/bitcoin"));
@@ -210,13 +196,10 @@ bool Intro::pickDataDirectory()
             }
             dataDir = intro.getDataDirectory();
             try {
-                if (TryCreateDirectories(GUIUtil::qstringToBoostPath(dataDir))) {
-                    // If a new data directory has been created, make wallets subdirectory too
-                    TryCreateDirectories(GUIUtil::qstringToBoostPath(dataDir) / "wallets");
-                }
+                TryCreateDirectory(GUIUtil::qstringToBoostPath(dataDir));
                 break;
             } catch (const fs::filesystem_error& e) {
-                QMessageBox::critical(nullptr, PACKAGE_NAME,
+                QMessageBox::critical(0, tr("BLTG Core"),
                     tr("Error: Specified data directory \"%1\" cannot be created.").arg(dataDir));
                 // fall through, back to choosing screen
             }
@@ -229,7 +212,7 @@ bool Intro::pickDataDirectory()
      * (to be consistent with bltgd behavior)
      */
     if (dataDir != getDefaultDataDirectory())
-        gArgs.SoftSetArg("-datadir", GUIUtil::qstringToBoostPath(dataDir).string()); // use OS locale for path setting
+        SoftSetArg("-datadir", GUIUtil::qstringToBoostPath(dataDir).string()); // use OS locale for path setting
     return true;
 }
 
@@ -250,8 +233,8 @@ void Intro::setStatus(int status, const QString& message, quint64 bytesAvailable
         ui->freeSpace->setText("");
     } else {
         QString freeString = tr("%1 GB of free space available").arg(bytesAvailable / GB_BYTES);
-        if (bytesAvailable < requiredSpace * GB_BYTES) {
-            freeString += " " + tr("(of %1 GB needed)").arg(requiredSpace);
+        if (bytesAvailable < BLOCK_CHAIN_SIZE) {
+            freeString += " " + tr("(of %1 GB needed)").arg(BLOCK_CHAIN_SIZE / GB_BYTES);
             ui->freeSpace->setStyleSheet("QLabel { color: #800000 }");
         } else {
             ui->freeSpace->setStyleSheet("");
@@ -304,11 +287,11 @@ void Intro::startThread()
     FreespaceChecker* executor = new FreespaceChecker(this);
     executor->moveToThread(thread);
 
-    connect(executor, &FreespaceChecker::reply, this, &Intro::setStatus);
-    connect(this, &Intro::requestCheck, executor, &FreespaceChecker::check);
+    connect(executor, SIGNAL(reply(int, QString, quint64)), this, SLOT(setStatus(int, QString, quint64)));
+    connect(this, SIGNAL(requestCheck()), executor, SLOT(check()));
     /*  make sure executor object is deleted in its own thread */
-    connect(this, &Intro::stopThread, executor, &QObject::deleteLater);
-    connect(this, &Intro::stopThread, thread, &QThread::quit);
+    connect(this, SIGNAL(stopThread()), executor, SLOT(deleteLater()));
+    connect(this, SIGNAL(stopThread()), thread, SLOT(quit()));
 
     thread->start();
 }
@@ -319,7 +302,7 @@ void Intro::checkPath(const QString& dataDir)
     pathToCheck = dataDir;
     if (!signalled) {
         signalled = true;
-        Q_EMIT requestCheck();
+        emit requestCheck();
     }
     mutex.unlock();
 }

@@ -1,13 +1,11 @@
-// Copyright (c) 2019-2020 The PIVX developers
+// Copyright (c) 2019 The PIVX developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef SENDCHANGEADDRESSDIALOG_H
 #define SENDCHANGEADDRESSDIALOG_H
 
-#include "script/standard.h"
-#include "qt/bltg/focuseddialog.h"
-#include "qt/bltg/snackbar.h"
+#include <QDialog>
 
 class WalletModel;
 
@@ -15,30 +13,21 @@ namespace Ui {
 class SendChangeAddressDialog;
 }
 
-class SendChangeAddressDialog : public FocusedDialog
+class SendChangeAddressDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit SendChangeAddressDialog(QWidget* parent, WalletModel* model);
+    explicit SendChangeAddressDialog(QWidget *parent = nullptr);
     ~SendChangeAddressDialog();
 
     void setAddress(QString address);
-    CTxDestination getDestination() const;
+    bool getAddress(WalletModel *model, QString *retAddress);
+    bool selected = false;
 
-    void showEvent(QShowEvent* event) override;
-
+    void showEvent(QShowEvent *event) override;
 private:
-    WalletModel* walletModel;
     Ui::SendChangeAddressDialog *ui;
-    SnackBar *snackBar = nullptr;
-    CTxDestination dest;
-
-    void inform(const QString& text);
-
-private Q_SLOTS:
-    void reset();
-    void accept() override;
 };
 
 #endif // SENDCHANGEADDRESSDIALOG_H

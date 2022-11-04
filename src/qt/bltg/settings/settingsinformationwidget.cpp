@@ -1,20 +1,16 @@
-// Copyright (c) 2019-2020 The PIVX developers
+// Copyright (c) 2019 The PIVX developers
 // Distributed under the MIT software license, see the accompanying
-// file COPYING or https://www.opensource.org/licenses/mit-license.php.
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "qt/bltg/settings/settingsinformationwidget.h"
 #include "qt/bltg/settings/forms/ui_settingsinformationwidget.h"
-
 #include "clientmodel.h"
 #include "chainparams.h"
 #include "db.h"
-#include "util/system.h"
+#include "util.h"
 #include "guiutil.h"
 #include "qt/bltg/qtutils.h"
-
 #include <QDir>
-
-#define REQUEST_UPDATE_COUNTS 0
 
 SettingsInformationWidget::SettingsInformationWidget(BLTGGUI* _window,QWidget *parent) :
     PWidget(_window,parent),
@@ -30,7 +26,18 @@ SettingsInformationWidget::SettingsInformationWidget(BLTGGUI* _window,QWidget *p
     setCssProperty({ui->layoutOptions1, ui->layoutOptions2, ui->layoutOptions3}, "container-options");
 
     // Title
+    ui->labelTitle->setText(tr("Information"));
     setCssTitleScreen(ui->labelTitle);
+
+    ui->labelTitleGeneral->setText(tr("General"));
+    ui->labelTitleClient->setText(tr("Client Version: "));
+    ui->labelTitleAgent->setText(tr("User Agent:"));
+    ui->labelTitleBerkeley->setText(tr("Using BerkeleyDB version:"));
+    ui->labelTitleDataDir->setText(tr("Datadir: "));
+    ui->labelTitleTime->setText(tr("Startup Time:  "));
+    ui->labelTitleNetwork->setText(tr("Network"));
+    ui->labelTitleName->setText(tr("Name:"));
+    ui->labelTitleConnections->setText(tr("Number Connections:"));
 
     setCssProperty({
         ui->labelTitleDataDir,
@@ -40,10 +47,8 @@ SettingsInformationWidget::SettingsInformationWidget(BLTGGUI* _window,QWidget *p
         ui->labelTitleTime,
         ui->labelTitleName,
         ui->labelTitleConnections,
-        ui->labelTitleMasternodes,
         ui->labelTitleBlockNumber,
         ui->labelTitleBlockTime,
-        ui->labelTitleBlockHash,
         ui->labelTitleNumberTransactions,
         ui->labelInfoNumberTransactions,
         ui->labelInfoClient,
@@ -52,7 +57,6 @@ SettingsInformationWidget::SettingsInformationWidget(BLTGGUI* _window,QWidget *p
         ui->labelInfoDataDir,
         ui->labelInfoTime,
         ui->labelInfoConnections,
-        ui->labelInfoMasternodes,
         ui->labelInfoBlockNumber
         }, "text-main-settings");
 
@@ -64,8 +68,14 @@ SettingsInformationWidget::SettingsInformationWidget(BLTGGUI* _window,QWidget *p
 
     },"text-title");
 
-    // TODO: Mempool section is not currently implemented and instead, hidden for now
+    ui->labelTitleBlockchain->setText(tr("Blockchain"));
+    ui->labelTitleBlockNumber->setText(tr("Current Number of Blocks:"));
+    ui->labelTitleBlockTime->setText(tr("Last Block Time:"));
+
+    ui->labelTitleMemory->setText(tr("Memory Pool"));
     ui->labelTitleMemory->setVisible(false);
+
+    ui->labelTitleNumberTransactions->setText(tr("Current Number of Transactions:"));
     ui->labelTitleNumberTransactions->setVisible(false);
     ui->labelInfoNumberTransactions->setText("0");
     ui->labelInfoNumberTransactions->setVisible(false);
@@ -73,16 +83,17 @@ SettingsInformationWidget::SettingsInformationWidget(BLTGGUI* _window,QWidget *p
     // Information Network
     ui->labelInfoName->setText(tr("Main"));
     ui->labelInfoName->setProperty("cssClass", "text-main-settings");
-    ui->labelInfoConnections->setText("0 (In: 0 / Out: 0)");
-    ui->labelInfoMasternodes->setText("Total: 0 (IPv4: 0 / IPv6: 0 / Tor: 0 / Unknown: 0");
+    ui->labelInfoConnections->setText("0 (In: 0 / Out:0)");
 
     // Information Blockchain
     ui->labelInfoBlockNumber->setText("0");
     ui->labelInfoBlockTime->setText("Sept 6, 2018. Thursday, 8:21:49 PM");
     ui->labelInfoBlockTime->setProperty("cssClass", "text-main-grey");
-    ui->labelInfoBlockHash->setProperty("cssClass", "text-main-hash");
 
     // Buttons
+    ui->pushButtonFile->setText(tr("Wallet Conf"));
+    ui->pushButtonNetworkMonitor->setText(tr("Network Monitor"));
+    ui->pushButtonBackups->setText(tr("Backups"));
     setCssBtnSecondary(ui->pushButtonBackups);
     setCssBtnSecondary(ui->pushButtonFile);
     setCssBtnSecondary(ui->pushButtonNetworkMonitor);
@@ -91,6 +102,7 @@ SettingsInformationWidget::SettingsInformationWidget(BLTGGUI* _window,QWidget *p
 #ifdef ENABLE_WALLET
     // Wallet data -- remove it with if it's needed
     ui->labelInfoBerkeley->setText(DbEnv::version(0, 0, 0));
+    ui->labelInfoDataDir->setText(QString::fromStdString(GetDataDir().string() + QDir::separator().toLatin1() + GetArg("-wallet", "wallet.dat")));
 #else
     ui->labelInfoBerkeley->setText(tr("No information"));
 #endif
@@ -103,32 +115,27 @@ SettingsInformationWidget::SettingsInformationWidget(BLTGGUI* _window,QWidget *p
         if (!GUIUtil::openConfigfile())
             inform(tr("Unable to open bltg.conf with default application"));
     });
-    connect(ui->pushButtonNetworkMonitor, &QPushButton::clicked, this, &SettingsInformationWidget::openNetworkMonitor);
+    connect(ui->pushButtonNetworkMonitor, SIGNAL(clicked()), this, SLOT(openNetworkMonitor()));
 }
 
 
-void SettingsInformationWidget::loadClientModel()
-{
+void SettingsInformationWidget::loadClientModel(){
     if (clientModel && clientModel->getPeerTableModel() && clientModel->getBanTableModel()) {
         // Provide initial values
         ui->labelInfoClient->setText(clientModel->formatFullVersion());
         ui->labelInfoAgent->setText(clientModel->clientName());
         ui->labelInfoTime->setText(clientModel->formatClientStartupTime());
         ui->labelInfoName->setText(QString::fromStdString(Params().NetworkIDString()));
-        ui->labelInfoDataDir->setText(clientModel->dataDir());
 
         setNumConnections(clientModel->getNumConnections());
-        connect(clientModel, &ClientModel::numConnectionsChanged, this, &SettingsInformationWidget::setNumConnections);
+        connect(clientModel, SIGNAL(numConnectionsChanged(int)), this, SLOT(setNumConnections(int)));
 
         setNumBlocks(clientModel->getNumBlocks());
-        connect(clientModel, &ClientModel::numBlocksChanged, this, &SettingsInformationWidget::setNumBlocks);
-
-        connect(clientModel, &ClientModel::strMasternodesChanged, this, &SettingsInformationWidget::setMasternodeCount);
+        connect(clientModel, SIGNAL(numBlocksChanged(int)), this, SLOT(setNumBlocks(int)));
     }
 }
 
-void SettingsInformationWidget::setNumConnections(int count)
-{
+void SettingsInformationWidget::setNumConnections(int count){
     if (!clientModel)
         return;
 
@@ -139,66 +146,20 @@ void SettingsInformationWidget::setNumConnections(int count)
     ui->labelInfoConnections->setText(connections);
 }
 
-void SettingsInformationWidget::setNumBlocks(int count)
-{
-    if (!isVisible()) return;
+void SettingsInformationWidget::setNumBlocks(int count){
     ui->labelInfoBlockNumber->setText(QString::number(count));
-    if (clientModel) {
+    if (clientModel)
         ui->labelInfoBlockTime->setText(clientModel->getLastBlockDate().toString());
-        ui->labelInfoBlockHash->setText(clientModel->getLastBlockHash());
-    }
 }
 
-void SettingsInformationWidget::setMasternodeCount(const QString& strMasternodes)
-{
-    ui->labelInfoMasternodes->setText(strMasternodes);
-}
-
-void SettingsInformationWidget::openNetworkMonitor()
-{
-    if (!rpcConsole) {
-        rpcConsole = new RPCConsole(nullptr);
+void SettingsInformationWidget::openNetworkMonitor(){
+    if(!rpcConsole){
+        rpcConsole = new RPCConsole(0);
         rpcConsole->setClientModel(clientModel);
-        rpcConsole->setWalletModel(walletModel);
     }
     rpcConsole->showNetwork();
 }
 
-void SettingsInformationWidget::showEvent(QShowEvent *event)
-{
-    QWidget::showEvent(event);
-    if (clientModel) {
-        clientModel->startMasternodesTimer();
-        // Initial masternodes count value, running in a worker thread to not lock mnmanager mutex in the main thread.
-        execute(REQUEST_UPDATE_COUNTS);
-    }
-}
-
-void SettingsInformationWidget::hideEvent(QHideEvent *event) {
-    QWidget::hideEvent(event);
-    if (clientModel) {
-        clientModel->stopMasternodesTimer();
-    }
-}
-
-void SettingsInformationWidget::run(int type)
-{
-    if (type == REQUEST_UPDATE_COUNTS) {
-        QMetaObject::invokeMethod(this, "setMasternodeCount",
-                                  Qt::QueuedConnection, Q_ARG(QString, clientModel->getMasternodesCount()));
-        QMetaObject::invokeMethod(this, "setNumBlocks",
-                                  Qt::QueuedConnection, Q_ARG(int, clientModel->getLastBlockProcessedHeight()));
-    }
-}
-
-void SettingsInformationWidget::onError(QString error, int type)
-{
-    if (type == REQUEST_UPDATE_COUNTS) {
-        setMasternodeCount(tr("No available data"));
-    }
-}
-
-SettingsInformationWidget::~SettingsInformationWidget()
-{
+SettingsInformationWidget::~SettingsInformationWidget(){
     delete ui;
 }

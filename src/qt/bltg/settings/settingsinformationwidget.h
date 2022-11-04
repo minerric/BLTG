@@ -19,22 +19,14 @@ class SettingsInformationWidget : public PWidget
 
 public:
     explicit SettingsInformationWidget(BLTGGUI* _window, QWidget *parent = nullptr);
-    ~SettingsInformationWidget() override;
+    ~SettingsInformationWidget();
 
     void loadClientModel() override;
 
-    void run(int type) override;
-    void onError(QString error, int type) override;
-
-private Q_SLOTS:
+private slots:
     void setNumConnections(int count);
     void setNumBlocks(int count);
-    void showEvent(QShowEvent* event) override;
-    void hideEvent(QHideEvent* event) override;
-
-public Q_SLOTS:
     void openNetworkMonitor();
-    void setMasternodeCount(const QString& strMasternodes);
 
 private:
     Ui::SettingsInformationWidget *ui;

@@ -3,16 +3,12 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-from test_framework.test_framework import BltgTestFramework
-from test_framework.util import (
-    assert_equal,
-    assert_raises_rpc_error,
-    connect_nodes,
-    Decimal,
-    disconnect_nodes,
-)
 
-class AbandonConflictTest(BltgTestFramework):
+from test_framework.test_framework import BitcoinTestFramework
+from test_framework.util import *
+import urllib.parse
+
+class AbandonConflictTest(BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
         self.setup_clean_chain = True
@@ -20,28 +16,23 @@ class AbandonConflictTest(BltgTestFramework):
 
     def run_test(self):
         self.nodes[0].generate(5)
-        self.sync_blocks()
+        sync_blocks(self.nodes)
         self.nodes[1].generate(110)
-        self.sync_blocks()
+        sync_blocks(self.nodes)
         balance = self.nodes[0].getbalance()
         txA = self.nodes[0].sendtoaddress(self.nodes[0].getnewaddress(), 10)
         txB = self.nodes[0].sendtoaddress(self.nodes[0].getnewaddress(), 10)
         txC = self.nodes[0].sendtoaddress(self.nodes[0].getnewaddress(), 10)
-        self.sync_mempools()
+        sync_mempools(self.nodes)
         self.nodes[1].generate(1)
 
-        # Can not abandon non-wallet transaction
-        assert_raises_rpc_error(-5, 'Invalid or non-wallet transaction id', lambda: self.nodes[0].abandontransaction('ff' * 32))
-        # Can not abandon confirmed transaction
-        assert_raises_rpc_error(-5, 'Transaction not eligible for abandonment', lambda: self.nodes[0].abandontransaction(txA))
-
-        self.sync_blocks()
+        sync_blocks(self.nodes)
         newbalance = self.nodes[0].getbalance()
         assert(balance - newbalance < Decimal("0.001")) #no more than fees lost
         balance = newbalance
 
-        # Disconnect nodes so node0's transactions don't get into node1's mempool
-        disconnect_nodes(self.nodes[0], 1)
+        url = urllib.parse.urlparse(self.nodes[1].url)
+        self.nodes[0].disconnectnode(url.hostname+":"+str(p2p_port(1)))
 
         # Identify the 10btc outputs
         nA = next(i for i, vout in enumerate(self.nodes[0].getrawtransaction(txA, 1)["vout"]) if vout["value"] == 10)
@@ -87,12 +78,12 @@ class AbandonConflictTest(BltgTestFramework):
 
         # Restart the node with a higher min relay fee so the parent tx is no longer in mempool
         # TODO: redo with eviction
-        self.restart_node(0, extra_args=["-minrelaytxfee=0.0001"])
-        assert self.nodes[0].getmempoolinfo()['loaded']
+        # Note had to make sure tx did not have AllowFree priority
+        self.stop_node(0)
+        self.start_node(0, extra_args=["-minrelaytxfee=0.0001"])
 
-        # Verify txs no longer in either node's mempool
+        # Verify txs no longer in mempool
         assert_equal(len(self.nodes[0].getrawmempool()), 0)
-        assert_equal(len(self.nodes[1].getrawmempool()), 0)
 
         # Not in mempool txs from self should only reduce balance
         # inputs are still spent, but change not received
@@ -153,7 +144,7 @@ class AbandonConflictTest(BltgTestFramework):
         self.nodes[1].generate(1)
 
         connect_nodes(self.nodes[0], 1)
-        self.sync_blocks()
+        sync_blocks(self.nodes)
 
         # Verify that B and C's 10 BTC outputs are available for spending again because AB1 is now conflicted
         newbalance = self.nodes[0].getbalance()
